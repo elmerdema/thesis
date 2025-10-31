@@ -1,2 +1,4 @@
 /meeting
 *.csv
+*.npy
+*.pdf
