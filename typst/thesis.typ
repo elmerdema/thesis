@@ -6,7 +6,7 @@
 #show heading.where(level: 2): set text(size: 14pt)
 
 #align(center)[
-  #text(size: 20pt, weight: "bold")[Predicting Quality of Experience (QoE) Using MARINA Parameters Extracted from P4/Tofino Switches]
+  #text(size: 20pt, weight: "bold")[Predicting Video Flow and QoE with MARINA Data from P4/Tofino Switches]
 
   #v(1cm)
   Elmer Dema(22211551) \
