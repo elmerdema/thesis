@@ -6,7 +6,7 @@
 #show heading.where(level: 2): set text(size: 14pt)
 
 #align(center)[
-  #text(size: 20pt, weight: "bold")[Predicting QoE with MARINA Data from P4/Tofino Switches]
+  #text(size: 20pt, weight: "bold")[QoE Prediction from Encrypted Traffic with MARINA on P4/Tofino]
 
   #v(1cm)
   Elmer Dema(22211551) \
