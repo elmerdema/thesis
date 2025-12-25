@@ -14,11 +14,18 @@ on quantifying the end-user's satisfaction. Consequently, network traffic manage
 application-level performance or QoE via video Key Performance Indicators (KPIs) that impact the user. The International Telecommunication Union (ITU) characterizes 
 QoE as the overall experience of a service from the subjective viewpoint of the end user @itu_g1011_qoe_assessment.
 
-#set par(
-  first-line-indent: 1em,
-  spacing: 0.65em,
-  justify: true,
+#figure(
+  image("../assets/cisco.jpeg", width: 90%),
+  caption: [
+    According to #link("https://www.cisco.com/c/en/us/solutions/collateral/executive-perspectives/annual-internet-report/white-paper-c11-741490.html")[
+      Cisco
+    ]Cisco, Video effect of the devices on traffic is more pronounced because of the introduction of Ultra-High-Definition (UHD), or 4K, video streaming.
+    #link("https://www.statista.com/chart/2349/consumer-data-traffic-2013-to-2018/")[
+      Source
+    ]
+  ],
 )
+
 A significant obstacle in video streaming is the absence of a standardized method for measuring QoE @bentaleb_survey_bitrate_adaptation, which has stimulated research into QoE models derived from network statistics. 
 Such modeling assists in defining specific KPIs for various user categories. For example, network providers might analyze tools like rebuffering or quality switching to understand their impact on the video stream. 
 
