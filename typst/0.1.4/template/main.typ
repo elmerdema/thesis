@@ -96,7 +96,7 @@
 
 #show: additional-styling
 
-= Einleitung<einleitung>
+= Introduction<einleitung>
 
 #introduction()
 
