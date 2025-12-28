@@ -72,7 +72,7 @@
   day: txt-todo,
   sprint: none,
   info: none,
-  img: image("images/starfish.png", height: 100pt),
+  img: image("images/persona.png", height: 100pt),
   more: none,
   keep: none,
   start: none,
