@@ -18,15 +18,14 @@
   #figure(
     image("../assets/cisco.jpeg", width: 90%),
     caption: [
-      According to #link("https://www.cisco.com/c/en/us/solutions/collateral/executive-perspectives/annual-internet-report/white-paper-c11-741490.html")[
-        Cisco
-      ], Video effect of the devices on traffic is more pronounced because of the introduction of Ultra-High-Definition (UHD), or 4K, video streaming.
+       Video effect of the devices on traffic is more pronounced because of the introduction of Ultra-High-Definition (UHD), or 4K, video streaming.
       #link("https://www.statista.com/chart/2349/consumer-data-traffic-2013-to-2018/")[
         Source
       ]
     ],
   )
 
+#pagebreak()
   A significant obstacle in video streaming is the absence of a standardized method 
   #footnote[The P.1203 model was validated only for #link("https://docs.aveq.info/surfmeter-docs/reference/video-qoe-model")[certain content conditions ]
   (e.g., video up to 1080p and  25 fps). Extrapolating beyond these ranges (e.g., 4K, high fps content) may create unreliable quality estimates unless updated or extended versions are used.]
@@ -47,7 +46,7 @@
     caption: [
       #link("https://www.mdpi.com/2079-9292/14/13/2587")[
         MPEG
-      ] DASH streaming scenario
+      ] DASH is a scenario where a video player dynamically switches between different quality levels of media segments delivered over HTTP to adapt to fluctuating network conditions for smooth playback.
     ],
   )
 ]

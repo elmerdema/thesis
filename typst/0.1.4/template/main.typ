@@ -6,6 +6,7 @@
 // Kapitel
 // https://github.com/typst/packages/blob/main/packages/preview/aio-studi-and-thesis/0.1.4/docs/example-de-thesis.pdf
 #import "chapters/introduction.typ": introduction
+#import "chapters/methodology.typ": methodology
 #import "chapters/summary.typ": summary
 // Füge hier weitere Kapitel hinzu
 
@@ -100,9 +101,10 @@
 
 #introduction()
 
-= Hauptteil
+= Methodology
 
-// Hier sollten die einzelnen Kapitel aufgerufen werden, welche zuvor unter `chapters` angelegt wurden
+#methodology()
+
 
 == Beispiele
 
