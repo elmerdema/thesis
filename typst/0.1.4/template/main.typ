@@ -90,7 +90,7 @@
     ),
   ),
   show-list-of-tables: true,   // Setze es auf false, wenn es nicht angezeigt werden soll
-  show-list-of-todos: true,    // Setze es auf false, wenn es nicht angezeigt werden soll
+  show-list-of-todos: false,    // Setze es auf false, wenn es nicht angezeigt werden soll
   literature-and-bibliography: bibliography(bib-file, title: none, style: "ieee", full: false),
 )
 
