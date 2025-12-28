@@ -5,6 +5,12 @@
 
 // Kapitel
 // https://github.com/typst/packages/blob/main/packages/preview/aio-studi-and-thesis/0.1.4/docs/example-de-thesis.pdf
+//
+//
+//
+
+// cd C:\Users\Administrator\Desktop\thesis\typst\0.1.4
+//typst watch --root . template/main.typ
 #import "chapters/introduction.typ": introduction
 #import "chapters/methodology.typ": methodology
 #import "chapters/summary.typ": summary
@@ -109,7 +115,7 @@
 == Beispiele
 
 // Aufruf einer Abkürzung
-#gls("repo-vorlage")
+//#gls("repo-vorlage")
 
 // Referenz zu einer anderen Überschrift
 @einleitung

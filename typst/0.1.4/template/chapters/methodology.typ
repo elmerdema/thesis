@@ -1,9 +1,42 @@
+import "video_flow.typ": video_flow
 #let methodology() = [
+
+
   #set par(first-line-indent: 1em, spacing: 1.2em, justify: true)
 
-  == Data Ingestion and Parsing
+  == Video flow
+  video_flow()
+
+  == Dataset analysis
+  The dataset used in this thesis originates from  #link("https://zenodo.org/records/14724247")[Karagkioules et l. paper.] 
+  The dataset is designed to fill this gap by providing measurements that were simultaneously obtained at the network, transport, and application layers. The data were generated using YouTube’s native Android application on two smartphone models at two locations in Europe over a period of more than five months. 
+
+At the application layer, a wide range of adaptive streaming parameters was extracted from YouTube’s mobile client. This was made possible by a recently 
+introduced Wrapper App @seufert_wrapper_youtube_android, which enables remote control and monitoring of YouTube’s native Android application. At the transport and network layers, the commonly used tool 
+tcpdump @tcpdump_packet_analyzer was used to record unfiltered packet logs on both the smartphones and a gateway. 
+The dataset includes measurements from 8 different scenarios, each representing a different quality and rate limiter. However, Scenario 6 is used since it provides automatic quality selection without any rate limiting, which closely resembles real-world conditions.
+  @karagkioules_youtube_mobile_dataset
+
+    #figure(
+    image("../assets/youtube_dataset.png", width: 50%),
+    caption: [
+      #link("https://d-nb.info/1311242007/34")[
+        Hardware
+      ]setup for regulated and automatic HAS traffic measurements
+    ],
+  )
+
+=== Data Ingestion and Parsing
   This chapter explains the pipeline designed to transform raw network traces and application logs into a structured dataset suitable for machine learning analysis. The pipeline, implemented in Python, handles data ingestion from log file formats and statistical feature extraction.
   
+#figure(
+    box(fill: luma(240), inset: 8pt, radius: 9pt, width: 100%)[
+      #set align(left)
+      #raw("(15174 IP(tos 0x0,ttl 55,id 0,offset 0,flags[DF],protoUDP(17),length 1378)74.125.105.91.443>192.168.10.200.4864: UDP, length 135)", lang: "python")
+    ],
+    caption: [Sample line from TCPdump network trace log showing a packet with timestamp and length.]
+  )
+
   The raw data for "Scenario 6" was distributed across a directory structure organized by Video ID and Iteration number. Each iteration contained two distinct data sources: network traffic logs (TCPdump) and application performance metrics (Phone Statistics). To ingest this data, custom parsing functions were developed to handle the semi-structured nature of the logs.
 
   For the network traces, a regular expression was used to extract the timestamp and packet size (length) from each line of the TCPdump output. The regex pattern used to capture these groups is defined below:
@@ -18,12 +51,12 @@
 
   On the other side, the application logs required a two-step parsing process. The parser first identified lines containing JSON objects embedded within the log text. It then extracted the JSON string, corrected formatting inconsistencies (such as trailing braces), and parsed the object to retrieve the ground-truth labels: Bandwidth Estimate (`bwe`) and Buffer Level (`buffer_level_ms`). 
 
-  == Temporal Synchronization and Preprocessing
+  === Temporal Synchronization and Preprocessing
   A critical challenge in this pipeline was aligning the timelines of the two data sources. The application logs recorded timestamps in a timezone differing from the network traces. To rectify this, a one-hour offset was added to the application statistics indices ($bold(t_"stats" + 1"h")$). 
   
   Furthermore, to ensure that the feature set captured the context relevant to the video session, the network packets were filtered to a specific time range. This range was defined dynamically as the interval $bold([t_"min" - 10"s", t_"max" + 10"s"])$, where $bold(t_"min")$ and $bold(t_"max")$ represent the start and end of the application logging period.
 
-  == Feature Engineering and Windowing
+  === Feature Engineering and Windowing
   The transformation from raw packet logs to model-ready features involved computing instantaneous metrics followed by a temporal aggregation. The system used a non-overlapping time window of *50ms*. 
 
   #figure(
@@ -83,9 +116,7 @@
     caption: [Definition of features extracted per 50ms time window.]
   )
 
-  #pagebreak()
-  
-  == Target Alignment and Dataset Construction
+  === Target Alignment and Dataset Construction
   The final stage of the pipeline merged the high-frequency network features with the lower-frequency application labels. Since the application statistics (Buffer Level and BWE) were logged at irregular intervals, a standard join was insufficient. Instead, a `merge_asof` (nearest key) strategy was implemented.
   
   For each 50ms feature window, the system located the nearest application log entry. A strict tolerance limit of *100ms* was enforced; if no application label existed within 100ms of the window's timestamp, the sample was discarded. This ensured that the model would not learn from stale state information.

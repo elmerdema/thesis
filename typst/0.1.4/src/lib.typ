@@ -297,47 +297,6 @@
     ]
   }
 
-  // List of Figures
-  if thesis-compliant or show-list-of-figures {
-    roman-page[
-      #heading(depth: 1, bookmarked: true)[ #get-heading-str("list-of-figures") ]
-
-      #simple-outline(
-        indent: outlines-indent,
-        target: figure.where(kind: image)
-      )
-    ]
-  }
-
-  // List of Abbreviations
-  if show-list-of-abbreviations and is-not-none-or-empty(list-of-abbreviations) {
-    show: make-glossary
-    if is-not-none-or-empty(list-of-abbreviations.at(0).key) and is-not-none-or-empty(list-of-abbreviations.at(0).short) {
-      roman-page[
-        #heading(depth: 1, bookmarked: true)[ #get-heading-str("list-of-abbreviations") ]
-        #register-glossary(list-of-abbreviations)
-        #print-glossary(list-of-abbreviations)
-      ]
-    }
-  }
-  
-  // List of Formulas
-  show math.equation.where(block: true) : it => rect(width: 100%, fill: background-color)[
-    #v(0.5em)
-    #it
-    #v(0.5em)
-  ]
-  
-  if show-list-of-formulas {  
-    roman-page[
-      #simple-outline(
-        title: get-heading-str("list-of-formulas"),
-        indent: outlines-indent,
-        target: figure.where(kind: custom-figure-kind.formula)
-      )
-    ]
-  }
-
   // Custom outlines
   if is-not-none-or-empty(custom-outlines) {
     for o in custom-outlines {
@@ -352,18 +311,17 @@
     }
   }
 
-  // List of Tables
-  if show-list-of-tables {
-    page(
-      numbering: "I"
-    )[
-      #simple-outline(
-        title: get-heading-str("list-of-tables"),
-        indent: outlines-indent,
-        target: figure.where(kind: table)
-      )
-    ]
+  // --- INITIALIZERS ---
+  
+  if show-list-of-abbreviations and is-not-none-or-empty(list-of-abbreviations) {
+    show: make-glossary
   }
+
+  show math.equation.where(block: true) : it => rect(width: 100%, fill: background-color)[
+    #v(0.5em)
+    #it
+    #v(0.5em)
+  ]
 
   // Body
   set page(
@@ -417,7 +375,7 @@
   
   body
 
-  // Literature, bibliography, attachements
+  // Literature, bibliography
   set heading(numbering: none)
 
   if is-not-none-or-empty(literature-and-bibliography) {
@@ -425,6 +383,56 @@
       #heading(depth: 1, bookmarked: true)[ #get-heading-str("literature-and-bibliography") ]
       #literature-and-bibliography
     ]
+  }
+
+  // --- MOVED LISTS (NOW AT END) ---
+  
+  // List of Figures
+  if thesis-compliant or show-list-of-figures {
+    pagebreak()
+    roman-page[
+      #heading(depth: 1, bookmarked: true)[ #get-heading-str("list-of-figures") ]
+      #simple-outline(
+        indent: outlines-indent,
+        target: figure.where(kind: image)
+      )
+    ]
+  }
+
+  // List of Tables
+  if show-list-of-tables {
+    pagebreak()
+    roman-page[
+      #simple-outline(
+        title: get-heading-str("list-of-tables"),
+        indent: outlines-indent,
+        target: figure.where(kind: table)
+      )
+    ]
+  }
+  
+  // List of Formulas
+  if show-list-of-formulas {  
+    pagebreak()
+    roman-page[
+      #simple-outline(
+        title: get-heading-str("list-of-formulas"),
+        indent: outlines-indent,
+        target: figure.where(kind: custom-figure-kind.formula)
+      )
+    ]
+  }
+
+  // List of Abbreviations
+  if show-list-of-abbreviations and is-not-none-or-empty(list-of-abbreviations) {
+    if is-not-none-or-empty(list-of-abbreviations.at(0).key) and is-not-none-or-empty(list-of-abbreviations.at(0).short) {
+      pagebreak()
+      roman-page[
+        #heading(depth: 1, bookmarked: true)[ #get-heading-str("list-of-abbreviations") ]
+        #register-glossary(list-of-abbreviations)
+        #print-glossary(list-of-abbreviations)
+      ]
+    }
   }
 
 }

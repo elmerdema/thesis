@@ -1,4 +1,4 @@
-#import "@preview/aio-studi-and-thesis:0.1.4": *
+#import "../src/lib.typ": *
 
 #let bib-file = "literature-and-bibliography.bib"
 #let bib = load-bibliography(read(bib-file))
