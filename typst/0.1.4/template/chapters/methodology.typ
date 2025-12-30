@@ -1,4 +1,5 @@
 #import "reporter_architecture.typ": reporter_architecture
+#import "modeling_pipeline.typ": modeling_pipeline
 #let methodology() = [
 
   #set par(first-line-indent: 1em, spacing: 1.2em, justify: true)
@@ -45,7 +46,7 @@
 
   On the other side, the application logs required a two-step parsing process. The parser first identified lines containing JSON objects embedded within the log text. It then extracted the JSON string, corrected formatting inconsistencies (such as trailing braces), and parsed the object to retrieve the ground-truth labels: Bandwidth Estimate (`bwe`) and Buffer Level (`buffer_level_ms`). 
 
-  === Temporal Synchronization and Preprocessing
+  === Synchronization and Preprocessing
   A critical challenge in this pipeline was aligning the timelines of the two data sources. The application logs recorded timestamps in a timezone differing from the network traces. To rectify this, a one-hour offset was added to the application statistics indices ($bold(t_"stats" + 1"h")$). 
   
   Furthermore, to ensure that the feature set captured the context relevant to the video session, the network packets were filtered to a specific time range. This range was defined dynamically as the interval $bold([t_"min" - 10"s", t_"max" + 10"s"])$, where $bold(t_"min")$ and $bold(t_"max")$ represent the start and end of the application logging period.
@@ -150,5 +151,7 @@
     ),
     caption: [ (Left) Feature distributions (log scale); (Right) Bandwidth vs Buffer Level over time.]
   )
+
+#modeling_pipeline()
 
 ]
