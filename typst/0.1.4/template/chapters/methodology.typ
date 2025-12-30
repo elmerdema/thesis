@@ -1,35 +1,29 @@
-import "video_flow.typ": video_flow
+#import "reporter_architecture.typ": reporter_architecture
 #let methodology() = [
-
 
   #set par(first-line-indent: 1em, spacing: 1.2em, justify: true)
 
-  == Video flow
-  video_flow()
+  #reporter_architecture("../assets/reporter.jpg")
 
   == Dataset analysis
-  The dataset used in this thesis originates from  #link("https://zenodo.org/records/14724247")[Karagkioules et l. paper.] 
+  The dataset used in this thesis originates from #link("https://zenodo.org/records/14724247")[Karagkioules et al. paper.] 
   The dataset is designed to fill this gap by providing measurements that were simultaneously obtained at the network, transport, and application layers. The data were generated using YouTube’s native Android application on two smartphone models at two locations in Europe over a period of more than five months. 
 
-At the application layer, a wide range of adaptive streaming parameters was extracted from YouTube’s mobile client. This was made possible by a recently 
-introduced Wrapper App @seufert_wrapper_youtube_android, which enables remote control and monitoring of YouTube’s native Android application. At the transport and network layers, the commonly used tool 
-tcpdump @tcpdump_packet_analyzer was used to record unfiltered packet logs on both the smartphones and a gateway. 
-The dataset includes measurements from 8 different scenarios, each representing a different quality and rate limiter. However, Scenario 6 is used since it provides automatic quality selection without any rate limiting, which closely resembles real-world conditions.
-  @karagkioules_youtube_mobile_dataset
+  At the application layer, a wide range of adaptive streaming parameters was extracted from YouTube’s mobile client. This was made possible by a recently introduced Wrapper App @seufert_wrapper_youtube_android, which enables remote control and monitoring of YouTube’s native Android application. At the transport and network layers, the commonly used tool tcpdump @tcpdump_packet_analyzer was used to record unfiltered packet logs on both the smartphones and a gateway. 
+  
+  The dataset includes measurements from 8 different scenarios, each representing a different quality and rate limiter. However, Scenario 6 is used since it provides automatic quality selection without any rate limiting, which closely resembles real-world conditions. @karagkioules_youtube_mobile_dataset
 
-    #figure(
+  #figure(
     image("../assets/youtube_dataset.png", width: 50%),
     caption: [
-      #link("https://d-nb.info/1311242007/34")[
-        Hardware
-      ]setup for regulated and automatic HAS traffic measurements
+      #link("https://d-nb.info/1311242007/34")[Hardware] setup for regulated and automatic HAS traffic measurements
     ],
   )
 
-=== Data Ingestion and Parsing
+  === Data Ingestion and Parsing
   This chapter explains the pipeline designed to transform raw network traces and application logs into a structured dataset suitable for machine learning analysis. The pipeline, implemented in Python, handles data ingestion from log file formats and statistical feature extraction.
   
-#figure(
+  #figure(
     box(fill: luma(240), inset: 8pt, radius: 9pt, width: 100%)[
       #set align(left)
       #raw("(15174 IP(tos 0x0,ttl 55,id 0,offset 0,flags[DF],protoUDP(17),length 1378)74.125.105.91.443>192.168.10.200.4864: UDP, length 135)", lang: "python")
@@ -76,7 +70,8 @@ The dataset includes measurements from 8 different scenarios, each representing 
     ],
     caption: [Pandas resampling operation to aggregate packet-level metrics into 50ms time windows.]
   )
-  
+
+  #pagebreak()
   First, specific metrics were calculated for every packet $i$ in the stream. The Inter-Arrival Time ($"IAT"$) was derived as the difference in timestamps between consecutive packets. Jitter was calculated as the absolute difference between consecutive IAT values. To capture the higher-order statistical properties of the traffic flow, the second and third moments (squares and cubes) were computed for both packet size ($"PS"$) and $"IAT"$.
 
   These values were then resampled into 50ms buckets. The aggregation rules applied to generate the final feature vector $X_t$ for each window $t$ are detailed in Table 1.
@@ -116,11 +111,44 @@ The dataset includes measurements from 8 different scenarios, each representing 
     caption: [Definition of features extracted per 50ms time window.]
   )
 
+  #figure(
+  table(
+    columns: (auto, 1fr, 1fr),
+    inset: 10pt,
+    align: (col, row) => if col == 0 { left } else { right },
+    fill: (col, row) => if row == 0 { luma(230) } else { none },
+    //  divider line under the header
+    stroke: (col, row) => if row == 0 { (bottom: 0.7pt + black) } else { (bottom: 0.5pt + luma(200)) },
+
+    [*Statistic*], [*Jitter(ms)*], [*Buffer Level (ms)*],
+
+    [Count], [163,090], [163,090],
+    [Mean], [40.78], [105,381.84],
+    [Std Dev], [441.41], [29,514.49],
+    [50% (Median)], [1.2], [120,077.00],
+    [75% (Q3)], [1.78], [122,075.75],
+    [Max], [9,231.11], [129,857.00],
+  ),
+  caption: [Summary statistics for Jitter and Buffer Level across the processed dataset.]
+) <tab:dataset_summary>
+
+  #pagebreak()
   === Target Alignment and Dataset Construction
   The final stage of the pipeline merged the high-frequency network features with the lower-frequency application labels. Since the application statistics (Buffer Level and BWE) were logged at irregular intervals, a standard join was insufficient. Instead, a `merge_asof` (nearest key) strategy was implemented.
   
   For each 50ms feature window, the system located the nearest application log entry. A strict tolerance limit of *100ms* was enforced; if no application label existed within 100ms of the window's timestamp, the sample was discarded. This ensured that the model would not learn from stale state information.
   
-  Post-merge, the dataset underwent a cleaning phase where any rows containing `NaN` values for the target variables were dropped. The final output consisted of a CSV file containing approximately 163,000 samples, encompassing the feature vector, the target labels, and identifiers for the video and iteration.
-]
+  Post-merge, the dataset underwent a cleaning phase where any rows containing `NaN` values for the target variables were dropped. The final output consisted of a CSV file containing approximately 163,000 samples, encompassing the feature vector, the target labels, and identifiers for the video and iteration. 
+  
 
+  #figure(
+    grid(
+      columns: (1fr, 1fr),
+      gutter: 10pt,
+      image("../assets/feature_distro.png", width: 100%, height: auto),
+      image("../assets/graph_bwe.png", width: 100%),
+    ),
+    caption: [ (Left) Feature distributions (log scale); (Right) Bandwidth vs Buffer Level over time.]
+  )
+
+]

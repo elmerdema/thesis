@@ -121,10 +121,9 @@
 @einleitung
 
 // Zitieren aus der Bibliographie
-Siehe @noauthor_bibliography_nodate
+Siehe
 
 // Verwendung von Inhalten aus der Bibliographie
-#bib.noauthor_citegeist_nodate.fields.title
 
 // TODO anlegen
 #todo[Das ist ein Beispiel]
