@@ -1,5 +1,6 @@
 #import "reporter_architecture.typ": reporter_architecture
 #import "modeling_pipeline.typ": modeling_pipeline
+#import "pforest_implementation.typ": pforest_implementation
 #let methodology() = [
 
   #set par(first-line-indent: 1em, spacing: 1.2em, justify: true)
@@ -153,5 +154,7 @@
   )
 
 #modeling_pipeline()
+
+#pforest_implementation()
 
 ]

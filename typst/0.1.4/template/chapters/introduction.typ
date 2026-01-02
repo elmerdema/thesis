@@ -7,7 +7,7 @@
   
   Machine Learning (ML) is a subgroup of Artificial Intelligence (AI), a field where computers autonomously learn from past data to generate 
   predictions or solutions. Recently, there has been a surge in applying ML methods to address practical challenges within 
-  computer networks @izima_video_quality_prediction. This thesis implements and extends recent applications of ML techniques that employ Quality of Experience (QoE) metrics to predict video quality. 
+  computer networks @izima_video_quality_prediction. This thesis implements and extends recent applications of ML techniques that use Quality of Experience (QoE) metrics to predict video quality. 
   These QoE measurements are essential for capturing the end-to-end performance of network services @vega_resilience_video_streaming.
   As video data makes up the majority of global IP traffic @cisco_vni_2017_2022, network operators are under pressure to optimize resource management while satisfying 
   user demands. In general, Video Quality Assessment (VQA) has relied on both subjective @itu_p910_video_quality and objective @chikkerur_objective_video_quality_assessment methodologies. Subjective methods focus 

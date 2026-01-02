@@ -1,10 +1,21 @@
 #let modeling_pipeline() = [
   #set par(first-line-indent: 1em, spacing: 1.2em, justify: true)
 
-  === Advanced Feature Engineering and Temporal Context
-  While the initial processing aggregated raw packet statistics into 50ms windows, network conditions are inherently temporal. A single 50ms snapshot lacks the context of preceding traffic trends. To address this, the feature set was augmented with historical context using Exponential Moving Averages (EMA) and Lag features.
+  == Evolution of the Methodology
+  The initial phase of this research focused on establishing a baseline classification model using "Marina-style" statistical features @marina_paper, where packet sizes and inter-arrival times were aggregated into isolated 50ms time windows using sums and moments. This earlier approach treated every time window as an independent event, relying on a simplistic labeling strategy that categorized network states solely based on the slope of buffer changes (filling versus depleting) without regard for the absolute buffer level. 
+  
+  While this established a foundational correlation between traffic volume and buffer trends, the model lacked temporal context. It could not distinguish between a sudden, transient traffic drop and a sustained outage, nor could it differentiate between a benign buffer drop from a high level and a critical depletion event leading to a video stall.
+  
+  To address these limitations, the updated pipeline restructured the feature engineering process to introduce *temporal awareness* and stateful logic suitable for deployment on network switches. This shift transitioned the system from a stateless traffic analyzer to a predictive, risk-aware QoE monitor.
 
-  The dataset was first sorted by `video_id` and `timestamp` to ensure chronological integrity. For every window $t$, the EMA was calculated with a span of 20 periods (approx. 1 second of history), simulating a "running average" state that a network switch might maintain. Additionally, lag features ($x_{t-1}$) and the rate of change (first-order difference) were computed to capture immediate fluctuations in bandwidth and jitter.
+  === Advanced Feature Engineering: Rolling Statistics
+  A raw 50ms observation is inherently noisy; a single dropped packet or a micro-burst can cause a spike in jitter that does not necessarily reflect the true network state. To smooth these fluctuations and capture the underlying trends (velocity and acceleration) of the traffic, the feature set was augmented using Exponential Moving Averages (EMA).
+
+  EMA is particularly suitable for resource-constrained hardware, such as P4-enabled switches, because it allows for "rolling" trend analysis without requiring the storage of a large historical buffer. The switch only needs to store the previous EMA value. The EMA at time $t$ is calculated as:
+
+  $ "EMA"_t = alpha dot X_t + (1 - alpha) dot "EMA"_(t-1) $
+
+  Where $X_t$ is the current observation (e.g., jitter or throughput) and $alpha$ is the smoothing factor. By calculating the EMA over a 20-window span (approx. 1 second), the model gains historical context, allowing it to react to sustained trends rather than transient noise.
 
   #figure(
     table(
@@ -14,10 +25,10 @@
       fill: (col, row) => if row == 0 { luma(230) } else { none },
       [*Derived Feature*], [*Mathematical Definition*],
       
-      [EMA (20-span)], 
+      [EMA (Trend)], 
       [$"EMA"_t = alpha dot x_t + (1-alpha) dot "EMA"_{t-1}$],
 
-      [Lag (History)], 
+      [Lag (Immediate History)], 
       [$x_"prev" = x_{t-1}$],
 
       [Rate of Change], 
@@ -26,10 +37,10 @@
     caption: [Temporal features engineered to capture historical context and trends.]
   )
 
-  === Target Class Definition: QoE State
-  A supervised learning approach requires well-defined target labels. Instead of predicting the raw buffer level (a regression task), it defines discrete "Quality of Experience (QoE) States" based on the future trajectory of the playback buffer.
+  === Target Class Definition: Risk-Based QoE State
+  A supervised learning approach requires well-defined target labels. The updated methodology moved beyond binary slope detection to a **risk-based classification scheme**. 
 
-  A "Lookahead" mechanism was implemented to inspect the buffer state 10 steps (500ms) into the future. By comparing the future buffer level ($B_{t+10}$) with the current level ($B_t$), a slope was calculated. This slope, combined with a critical safety threshold (2000ms), categorized the network state into three distinct classes:
+  A "Lookahead" mechanism was implemented to inspect the buffer state 10 steps (500ms) into the future. By comparing the future buffer level ($B_{t+10}$) with the current level ($B_t$), a slope was calculated. Crucially, this logic introduced a **"Critical"** class, defined as a depleting trend occurring when the buffer is *already* below a safety threshold (e.g., 2000ms). This forces the model to prioritize the detection of imminent QoE violations over simple fluctuations.
 
   #figure(
     box(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
@@ -54,11 +65,12 @@
   The resulting class distribution was highly imbalanced, with "Safe_Drain" dominating the dataset (61.3%) and "Critical" instances, the most important cases to detect, representing only 0.04% of the samples.
 
   == Preliminary Modeling and Feature Importance
-  To establish a baseline for classification performance, a Random Forest Classifier was trained. The model utilized 150 estimators with a maximum depth of 12. To mitigate the extreme class imbalance observed in the target variable, the model was initialized with `class_weight='balanced'`, which penalizes misclassification of the minority class ("Critical") more heavily.
+  To establish a baseline for classification performance, a Random Forest Classifier was trained using 150 estimators and a maximum depth of 12. To mitigate the extreme class imbalance, the model utilized `class_weight='balanced'`, which penalizes misclassification of the minority class ("Critical") more heavily.
 
   The input feature vector $X$ for this baseline experiment was reduced to four core metrics: `packet_count`, `ps_sum`, `iat_sum`, and `jitter`.#footnote[
     This initial experiment focused on core traffic metrics to establish a performance baseline. Other features can be used as well, however the trained model might not fit on resource-constrained devices like P4 switches.
   ]
+
   === Performance Evaluation
   The model was evaluated on a stratified test set (25% split). As shown in the classification report, the model struggled significantly with the "Critical" class due to the scarcity of samples (only 19 support instances in the test set). While Recall for "Critical" cases was high (0.95), the Precision was near zero, indicating a high false-positive rate.
 
@@ -69,7 +81,7 @@
       align: center,
       fill: (col, row) => if row == 0 { luma(230) } else { none },
       [*Class*], [*Precision*], [*Recall*], [*F1-Score*],
-      [Critical], [0.00], [0.95], [0.00],
+      [Critical], [0.08], [0.95], [0.00],
       [Safe_Drain], [0.78], [0.02], [0.03],
       [Steady], [0.69], [0.69], [0.69],
     ),
@@ -94,5 +106,5 @@
     caption: [Feature importance ranking derived from the Random Forest model.]
   )
   
-  Finally, the processed feature matrix $X$ and the one-hot encoded target variables $Y$ were exported as NumPy arrays (`.npy`) to be ingested into deep learning frameworks for other experiments.
+  Finally, the processed feature matrix $X$ and the one-hot encoded target variables $Y$ were exported as NumPy arrays (`.npy`) to facilitate ingestion into deep learning frameworks for subsequent experiments.
 ]
