@@ -67,13 +67,8 @@
   ),
 
   // Declaration
-  custom-declaration: none,
-  declaration-on-the-final-thesis: (
-    legal-reference: none,
-    thesis-name: none,
-    consent-to-publication-in-the-library: none,
-    genitive-of-university: none
-  ),
+  custom-declaration: image("assets/form.pdf", width: 100%, height: 100%),
+  declaration-on-the-final-thesis: none,
 
   abstract: abstract(),
 
@@ -104,23 +99,6 @@
 = Methodology
 
 #methodology()
-
-
-== Beispiele
-
-// Aufruf einer Abkürzung
-//#gls("repo-vorlage")
-
-// Referenz zu einer anderen Überschrift
-@einleitung
-
-// Zitieren aus der Bibliographie
-Siehe
-
-// Verwendung von Inhalten aus der Bibliographie
-
-// TODO anlegen
-#todo[Das ist ein Beispiel]
 
 = Schluss/Zusammenfassung/Fazit<zusammenfassung>
 

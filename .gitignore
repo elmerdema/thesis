@@ -1,5 +1,4 @@
 /meeting
 *.csv
 *.npy
-*.pdf
 /data

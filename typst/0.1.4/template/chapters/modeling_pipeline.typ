@@ -13,7 +13,12 @@
 
   EMA is particularly suitable for resource-constrained hardware, such as P4-enabled switches, because it allows for "rolling" trend analysis without requiring the storage of a large historical buffer. The switch only needs to store the previous EMA value. The EMA at time $t$ is calculated as:
 
-  $ "EMA"_t = alpha dot X_t + (1 - alpha) dot "EMA"_(t-1) $
+  #figure(
+    $ "EMA"_t = alpha dot X_t + (1 - alpha) dot "EMA"_(t-1) $,
+    caption: [Exponential Moving Average formula, where $X_t$ is the current observation and $alpha$ is the smoothing factor.],
+    kind: "formula",
+    supplement: "Formula",
+  )
 
   Where $X_t$ is the current observation (e.g., jitter or throughput) and $alpha$ is the smoothing factor. By calculating the EMA over a 20-window span (approx. 1 second), the model gains historical context, allowing it to react to sustained trends rather than transient noise.
 

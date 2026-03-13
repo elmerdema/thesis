@@ -430,7 +430,7 @@
       roman-page[
         #heading(depth: 1, bookmarked: true)[ #get-heading-str("list-of-abbreviations") ]
         #register-glossary(list-of-abbreviations)
-        #print-glossary(list-of-abbreviations)
+        #print-glossary(list-of-abbreviations, show-all: true)
       ]
     }
   }

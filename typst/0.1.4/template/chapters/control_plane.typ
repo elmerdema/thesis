@@ -1,4 +1,4 @@
-#let control_plane_configuration() =[
+#let control_plane_configuration() = [
   #set par(first-line-indent: 1em, spacing: 1.2em, justify: true)
 
   === Control Plane Configuration: Streamlined Forwarding
@@ -6,10 +6,10 @@
 
   For this evaluation, a streamlined Python script was developed utilizing the Barefoot Runtime (BFRT) gRPC interface. Unlike full deployment scripts that initialize the entire ML pipeline, telemetry thresholds, and routing logic simultaneously, this script was intentionally decoupled to focus exclusively on the `tbl_forward` table.
 
-  ==== Motivation for a Streamlined Approach
+  === Isolated Forwarding Table Configuration
   The decision to isolate the forwarding logic was driven by the need for modularity during testing. By removing the overhead of configuring the entire P4 pipeline, this script allows for rapid, incremental updates to the routing topology without resetting the switch's telemetry or machine learning states. This is particularly advantageous during debugging or when switching between the "Reporter" and "Translator" testing phases, as it guarantees that basic Layer 3 forwarding remains intact regardless of the data plane's experimental features.
 
-  ==== BFRT gRPC Implementation
+  === BFRT gRPC Implementation
   The script connects to the Tofino's BFRT server on `localhost:50052` and binds to the deployed pipeline profile (`p4_marina_reporter`). It then targets the `SwitchIngress.tbl_forward` table, retrieving the dynamically assigned action IDs directly from the compiler's output, which ensures robustness against P4 code modifications.
 
   #figure(
@@ -19,8 +19,8 @@
       # Construct the Match Key (Destination IP)
       key =[
           tbl_forward.make_key([
-              gc.KeyTuple('hdr.ipv4.dstAddr', 
-                          gc.ipv4_to_bytes('192.168.100.1'), 
+              gc.KeyTuple('hdr.ipv4.dstAddr',
+                          gc.ipv4_to_bytes('192.168.100.1'),
                           prefix_len=32)
           ])
       ]
@@ -38,10 +38,10 @@
       tbl_forward.entry_add(target, key, data)
       ```
     ],
-    caption:[BFRT gRPC snippet demonstrating the insertion of a match-action entry into the Tofino hardware.]
+    caption: [BFRT gRPC snippet demonstrating the insertion of a match-action entry into the Tofino hardware.],
   )
 
-  ==== Table Logic and Topology Integration
+  === Table Logic and Topology Integration
   The hardware testbed consists of the TRex traffic generator communicating with the Tofino switch via an intermediate Arista switch. Because the TRex server generates traffic destined for `192.168.100.1`, the Tofino switch must correctly identify these packets, assign them to the correct egress port, and rewrite the Ethernet headers to ensure the Arista switch forwards them back to the TRex RX interface.
 
   The inserted entry implements Exact Match logic on the IPv4 destination address. When a packet matches, the action parameters (`port`, `dst_mac`, and `src_mac`) are applied natively at line rate by the switch's ALUs. Table 3 outlines the exact mapping programmed by the control plane script.
@@ -52,15 +52,15 @@
       inset: 10pt,
       align: left,
       fill: (col, row) => if row == 0 { luma(230) } else { none },
-      
+
       [*Component*], [*Parameter*], [*Configured Value*],
-      
-      [Match Key], [`hdr.ipv4.dstAddr`],[`192.168.100.1/32` (Exact Match)],
-      [Action Data], [`port`],[`16` (Logical Egress Port to TRex)],
-      [Action Data], [`src_mac`],[`D0:77:CE:2B:20:54` (Tofino Egress MAC)],
-      [Action Data], [`dst_mac`],[`10:70:fd:30:80:d1` (TRex RX Interface MAC)],
+
+      [Match Key], [`hdr.ipv4.dstAddr`], [`192.168.100.1/32` (Exact Match)],
+      [Action Data], [`port`], [`16` (Logical Egress Port to TRex)],
+      [Action Data], [`src_mac`], [`D0:77:CE:2B:20:54` (Tofino Egress MAC)],
+      [Action Data], [`dst_mac`], [`10:70:fd:30:80:d1` (TRex RX Interface MAC)],
     ),
-    caption:[Forwarding rules populated in the data plane by the control plane script.]
+    caption: [Forwarding rules populated in the data plane by the control plane script.],
   ) <tab:forwarding_rules>
 
   By successfully executing this script, the control plane ensures that any packet, whether it is raw telemetry traffic or an evaluated packet returning from the QoE ML models, is correctly encapsulated and routed back to the TRex server for statistical analysis and PCAP capture. Furthermore, the inclusion of exception handling in the script guarantees that connection failures or missing dependencies are gracefully reported, significantly simplifying the operational workflow of the testbed.
