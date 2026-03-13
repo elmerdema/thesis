@@ -121,7 +121,7 @@ def configure_ports(bfrt_info, target_dev):
             )
             print(f"    Port {dev_port} added and enabled.")
         except Exception as e:
-            # Port may already exist — try modifying instead
+            # Port may already exist
             try:
                 port_table.entry_mod(
                     target_dev,
@@ -314,7 +314,7 @@ def main():
     for a in mirror_fields_by_action:
         if a != '$normal':
             action_names_to_try.append(a)
-    action_names_to_try.append(None)   # actionless — make_data without action
+    action_names_to_try.append(None)   # actionless , make_data without action
 
     def try_mirror_config(tgt, data_tuples, action_name):
         """Try to add mirror session. Catches make_data validation errors."""
@@ -368,7 +368,7 @@ def main():
             gc.DataTuple('$session_enable', bool_val=True),
         ]))
 
-    # Without direction (fallback — will fail at pipe layer but try anyway)
+    # Without direction (will fail at pipe layer but try anyway)
     mirror_configs.append(("no direction, max_pkt_len", [
         gc.DataTuple('$ucast_egress_port', TOFINO_EGRESS_PORT),
         gc.DataTuple('$ucast_egress_port_valid', bool_val=True),
@@ -521,7 +521,7 @@ def main():
         data_fields = [
             gc.DataTuple('collector_ip', gc.ipv4_to_bytes(COLLECTOR_IP)),
         ]
-        print(f"  All flows -> collector {COLLECTOR_IP}  [ip only — recompile P4 to include MAC]")
+        print(f"  All flows -> collector {COLLECTOR_IP}  [ip only,will recompile P4 to include MAC]")
         print(f"  WARNING: collector_mac not in binary. DTA Ethernet dst will be unset.")
         print(f"  Fix: scp marina_reporter.p4 to Tofino, recompile, restart switchd, redeploy.")
 

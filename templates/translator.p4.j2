@@ -1,0 +1,488 @@
+/* -*- P4_16 -*- */
+/* pForest Translator: DTA Packet Classification
+ *
+ * Receives DTA Marina packets with pre-computed telemetry features,
+ * runs random forest classification in ingress, writes the result
+ * back into the packet, and forwards.
+ *
+ * Architecture: {{ arch | upper }}
+ * Features: {{ features | length }} (bitmap: 0x{{ '%08X' % used_features_bitmap }})
+ * Trees: {{ num_trees }}, Depth: {{ max_depth }}
+ *
+ * Flow:
+ *   Ingress: Parse DTA → extract features → classify → write result → forward
+ *   Egress:  Pass-through
+ */
+
+#include <core.p4>
+{% if arch == "t2na" %}
+#include <t2na.p4>
+{% else %}
+#include <tna.p4>
+{% endif %}
+
+/*************************************************************************
+ ************** C O N S T A N T S  A N D  T Y P E S  *********************
+ *************************************************************************/
+
+#define ETHERTYPE_IPV4 0x0800
+#define PROTOCOL_TCP   0x06
+#define PROTOCOL_UDP   0x11
+#define DTA_PORT_NUMBER 40040
+#define DTA_OPCODE_MARINA 0x05
+
+typedef bit<48> mac_addr_t;
+typedef bit<32> ipv4_addr_t;
+typedef bit<32> telemetry_key_t;
+typedef bit<9>  port_t;
+
+/*************************************************************************
+ *********************** H E A D E R S  **********************************
+ *************************************************************************/
+
+header ethernet_h {
+    mac_addr_t dstAddr;
+    mac_addr_t srcAddr;
+    bit<16> etherType;
+}
+
+header ipv4_h {
+    bit<4>  version;
+    bit<4>  ihl;
+    bit<6>  dscp;
+    bit<2>  ecn;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3>  flags;
+    bit<13> fragOffset;
+    bit<8>  ttl;
+    bit<8>  protocol;
+    bit<16> hdrChecksum;
+    ipv4_addr_t srcAddr;
+    ipv4_addr_t dstAddr;
+}
+
+header udp_h {
+    bit<16> srcPort;
+    bit<16> dstPort;
+    bit<16> length;
+    bit<16> checksum;
+}
+
+header tcp_h {
+    bit<16> srcPort;
+    bit<16> dstPort;
+    bit<32> seqNum;
+    bit<32> ackNum;
+    bit<4>  dataOffset;
+    bit<4>  res;
+    bit<8>  flags;
+    bit<16> window;
+    bit<16> checksum;
+    bit<16> urgentPtr;
+}
+
+header dta_base_h {
+    bit<8>  opcode;
+    bit<1>  immediate;
+    bit<7>  reserved;
+}
+
+header dta_keyval_static_h {
+    bit<8>  redundancyLevel;
+    telemetry_key_t key;
+}
+
+// DTA keywrite data carries the Marina telemetry features.
+// This matches the fields produced by the Marina reporter.
+header keywrite_data_h {
+    bit<32> packet_count;
+    bit<32> last_packet_timestamp;
+    bit<32> sum_of_iat;
+    bit<32> sum_of_iat_squared;
+    bit<32> sum_of_iat_cubed;
+    bit<32> sum_of_packet_size;
+    bit<32> sum_of_packet_size_squared;
+    bit<32> sum_of_packet_size_cubed;
+    bit<32> jitter;
+    bit<32> src_ip_addr;
+    bit<32> dst_ip_addr;
+    bit<16> src_port_num;
+    bit<16> dst_port_num;
+    bit<8>  protocol_type;
+}
+
+// Appended by the translator after classification
+header classification_result_h {
+    bit<8>  classification;       // 0 or 1
+    bit<8>  num_trees;            // how many trees voted
+    bit<16> used_features_bitmap; // which features were used
+}
+
+struct headers_t {
+    ethernet_h              ethernet;
+    ipv4_h                  ipv4;
+    udp_h                   udp;
+    tcp_h                   tcp;
+    dta_base_h              dta_base;
+    dta_keyval_static_h     dta_keyval;
+    keywrite_data_h         keywrite_data;
+    classification_result_h classification;
+}
+
+/*************************************************************************
+ *********************** M E T A D A T A  ********************************
+ *************************************************************************/
+
+// Classification state for the decision trees
+struct classification_vars_t {
+    {%- for i in range(num_trees) %}
+    bit<16> current_node_tree{{ i + 1 }};
+    {%- endfor %}
+
+    bit<32> feature_value_shared;
+
+    {%- for i in range(num_trees) %}
+    bit<1> label_tree{{ i + 1 }};
+    bit<16> certainty_tree{{ i + 1 }};
+    {%- endfor %}
+}
+
+struct ingress_metadata_t {
+    bit<1>  is_dta_packet;
+    bit<8>  classification_result;
+
+    // Features extracted from the DTA keywrite header
+    {%- for feat in features %}
+    bit<{{ feat.width }}> {{ feat.p4_field }};
+    {%- endfor %}
+
+    // Classification
+    classification_vars_t classification;
+}
+
+// Egress is pass-through, minimal metadata
+struct egress_metadata_t {
+    bit<1> dummy;
+}
+
+/*************************************************************************
+ ************************ I N G R E S S  P A R S E R  ********************
+ *************************************************************************/
+
+parser IngressParser(
+        packet_in pkt,
+        out headers_t hdr,
+        out ingress_metadata_t ig_md,
+        out ingress_intrinsic_metadata_t ig_intr_md) {
+
+    state start {
+        pkt.extract(ig_intr_md);
+        pkt.advance(PORT_METADATA_SIZE);
+        ig_md.is_dta_packet = 0;
+        transition parse_ethernet;
+    }
+
+    state parse_ethernet {
+        pkt.extract(hdr.ethernet);
+        transition select(hdr.ethernet.etherType) {
+            ETHERTYPE_IPV4: parse_ipv4;
+            default: accept;
+        }
+    }
+
+    state parse_ipv4 {
+        pkt.extract(hdr.ipv4);
+        transition select(hdr.ipv4.protocol) {
+            PROTOCOL_UDP: parse_udp;
+            PROTOCOL_TCP: parse_tcp;
+            default: accept;
+        }
+    }
+
+    state parse_tcp {
+        pkt.extract(hdr.tcp);
+        transition accept;
+    }
+
+    state parse_udp {
+        pkt.extract(hdr.udp);
+        transition select(hdr.udp.dstPort) {
+            DTA_PORT_NUMBER: parse_dta_base;
+            default: accept;
+        }
+    }
+
+    state parse_dta_base {
+        pkt.extract(hdr.dta_base);
+        transition select(hdr.dta_base.opcode) {
+            DTA_OPCODE_MARINA: parse_dta_keyval;
+            default: accept;
+        }
+    }
+
+    state parse_dta_keyval {
+        pkt.extract(hdr.dta_keyval);
+        transition parse_keywrite_data;
+    }
+
+    state parse_keywrite_data {
+        pkt.extract(hdr.keywrite_data);
+        ig_md.is_dta_packet = 1;
+        transition accept;
+    }
+}
+
+/*************************************************************************
+ ************** I N G R E S S   P R O C E S S I N G   ********************
+ *************************************************************************/
+
+control Ingress(
+        inout headers_t hdr,
+        inout ingress_metadata_t ig_md,
+        in ingress_intrinsic_metadata_t ig_intr_md,
+        in ingress_intrinsic_metadata_from_parser_t ig_prsr_md,
+        inout ingress_intrinsic_metadata_for_deparser_t ig_dprsr_md,
+        inout ingress_intrinsic_metadata_for_tm_t ig_tm_md) {
+
+    // ======================== Forwarding ========================
+
+    action forward(PortId_t port) {
+        ig_tm_md.ucast_egress_port = port;
+    }
+
+    action drop() {
+        ig_dprsr_md.drop_ctl = 1;
+    }
+
+    table forward_table {
+        key = {
+            ig_intr_md.ingress_port: exact;
+        }
+        actions = {
+            forward;
+            @defaultonly drop;
+        }
+        size = 512;
+        default_action = drop;
+    }
+
+    // ======================== Feature Extraction ========================
+    // Copy features from parsed DTA header into metadata for classification
+
+    action extract_features() {
+        {%- for feat in features %}
+        ig_md.{{ feat.p4_field }} = hdr.keywrite_data.{{ feat.p4_field }};
+        {%- endfor %}
+    }
+
+    // ======================== Tree Actions ========================
+
+    {%- for i in range(num_trees) %}
+    // Tree {{ i + 1 }} actions
+    action action_leaf_tree_{{ i + 1 }}(bit<1> label, bit<16> certainty) {
+        ig_md.classification.label_tree{{ i + 1 }} = label;
+        ig_md.classification.certainty_tree{{ i + 1 }} = certainty;
+    }
+
+    {%- for feat in features %}
+    action action_node_tree_{{ i + 1 }}_feat{{ loop.index0 }}(bit<16> next_node) {
+        ig_md.classification.current_node_tree{{ i + 1 }} = next_node;
+        ig_md.classification.feature_value_shared = {% if feat.width == 32 %}ig_md.{{ feat.p4_field }}{% else %}(bit<32>)ig_md.{{ feat.p4_field }}{% endif %};
+    }
+    {%- endfor %}
+    {%- endfor %}
+
+    // ======================== Classification Tables ========================
+    // One table per tree per depth level
+
+    {%- for i in range(num_trees) %}
+    {%- for j in range(max_depth + 1) %}
+    {%- set base_entries = 2 ** (j + 1) * 2 %}
+    {%- set table_size = base_entries * 64 %}
+    table table{{ i + 1 }}{{ j }} {
+        key = {
+            ig_md.classification.current_node_tree{{ i + 1 }}: exact;
+            ig_md.classification.feature_value_shared: ternary;
+        }
+        actions = {
+            {%- for feat in features %}
+            action_node_tree_{{ i + 1 }}_feat{{ loop.index0 }};
+            {%- endfor %}
+            action_leaf_tree_{{ i + 1 }};
+            NoAction;
+        }
+        size = {{ [table_size, 512] | max }};
+        default_action = NoAction;
+    }
+    {%- endfor %}
+    {%- endfor %}
+
+    // ======================== Majority Voting Table ========================
+
+    action set_vote_result(bit<8> result) {
+        ig_md.classification_result = result;
+    }
+
+    {%- if num_trees > 1 %}
+    table majority_vote {
+        key = {
+            {%- for i in range(num_trees) %}
+            ig_md.classification.label_tree{{ i + 1 }}: exact;
+            {%- endfor %}
+        }
+        actions = {
+            set_vote_result;
+        }
+        size = {{ 2 ** num_trees }};
+    }
+    {%- endif %}
+
+    // ======================== Apply ========================
+
+    apply {
+        // Forward all packets
+        forward_table.apply();
+
+        if (ig_md.is_dta_packet == 1) {
+            // --- Feature Extraction ---
+            extract_features();
+
+            // --- Initialize tree root nodes ---
+            {%- for i in range(num_trees) %}
+            ig_md.classification.current_node_tree{{ i + 1 }} = 256;  // Root sentinel
+            {%- endfor %}
+
+            // --- Decision Tree Traversal ---
+            {%- for j in range(num_trees) %}
+            {%- for i in range(max_depth) %}
+            {%- filter indent(width=12 + (i * 4), first=True) %}
+switch(table{{ j + 1 }}{{ i }}.apply().action_run) {
+                {%- for feat in features %}
+action_node_tree_{{ j + 1 }}_feat{{ loop.index0 }}:
+                {%- endfor %}
+{
+            {%- endfilter %}
+            {%- endfor %}
+
+            {%- filter indent(width=12 + (max_depth * 4), first=True) %}
+table{{ j + 1 }}{{ max_depth }}.apply();
+            {%- endfilter %}
+
+            {%- for i in range(max_depth) %}
+            {%- filter indent(width=12 + ((max_depth - 1 - i) * 4), first=True) %}
+}
+}
+            {%- endfilter %}
+            {%- endfor %}
+            {%- endfor %}
+
+            // --- Majority Voting ---
+            {%- if num_trees == 1 %}
+            ig_md.classification_result = (bit<8>)ig_md.classification.label_tree1;
+            {%- else %}
+            majority_vote.apply();
+            {%- endif %}
+
+            // --- Write classification result into outgoing packet ---
+            hdr.classification.setValid();
+            hdr.classification.classification = ig_md.classification_result;
+            hdr.classification.num_trees = {{ num_trees }};
+            hdr.classification.used_features_bitmap = {{ used_features_bitmap }};
+
+            // Update IPv4 totalLen to account for the appended classification header (4 bytes)
+            hdr.ipv4.totalLen = hdr.ipv4.totalLen + 4;
+            // Update UDP length similarly
+            hdr.udp.length = hdr.udp.length + 4;
+        }
+    }
+}
+
+/*************************************************************************
+ ************** I N G R E S S   D E P A R S E R  *************************
+ *************************************************************************/
+
+control IngressDeparser(
+        packet_out pkt,
+        inout headers_t hdr,
+        in ingress_metadata_t ig_md,
+        in ingress_intrinsic_metadata_for_deparser_t ig_dprsr_md) {
+
+    Checksum() ipv4_checksum;
+
+    apply {
+        hdr.ipv4.hdrChecksum = ipv4_checksum.update(
+            {hdr.ipv4.version,
+             hdr.ipv4.ihl,
+             hdr.ipv4.dscp,
+             hdr.ipv4.ecn,
+             hdr.ipv4.totalLen,
+             hdr.ipv4.identification,
+             hdr.ipv4.flags,
+             hdr.ipv4.fragOffset,
+             hdr.ipv4.ttl,
+             hdr.ipv4.protocol,
+             hdr.ipv4.srcAddr,
+             hdr.ipv4.dstAddr});
+
+        pkt.emit(hdr.ethernet);
+        pkt.emit(hdr.ipv4);
+        pkt.emit(hdr.udp);
+        pkt.emit(hdr.tcp);
+        pkt.emit(hdr.dta_base);
+        pkt.emit(hdr.dta_keyval);
+        pkt.emit(hdr.keywrite_data);
+        pkt.emit(hdr.classification);
+    }
+}
+
+/*************************************************************************
+ ************************ E G R E S S  (pass-through) ********************
+ *************************************************************************/
+
+parser EgressParser(
+        packet_in pkt,
+        out headers_t hdr,
+        out egress_metadata_t eg_md,
+        out egress_intrinsic_metadata_t eg_intr_md) {
+
+    state start {
+        pkt.extract(eg_intr_md);
+        transition accept;
+    }
+}
+
+control Egress(
+        inout headers_t hdr,
+        inout egress_metadata_t eg_md,
+        in egress_intrinsic_metadata_t eg_intr_md,
+        in egress_intrinsic_metadata_from_parser_t eg_prsr_md,
+        inout egress_intrinsic_metadata_for_deparser_t eg_dprsr_md,
+        inout egress_intrinsic_metadata_for_output_port_t eg_oport_md) {
+    apply { }
+}
+
+control EgressDeparser(
+        packet_out pkt,
+        inout headers_t hdr,
+        in egress_metadata_t eg_md,
+        in egress_intrinsic_metadata_for_deparser_t eg_dprsr_md) {
+    apply {
+        pkt.emit(hdr);
+    }
+}
+
+/*************************************************************************
+ ***************************  P I P E L I N E  ****************************
+ *************************************************************************/
+
+Pipeline(
+    IngressParser(),
+    Ingress(),
+    IngressDeparser(),
+    EgressParser(),
+    Egress(),
+    EgressDeparser()
+) pipe;
+
+Switch(pipe) main;
