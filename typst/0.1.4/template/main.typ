@@ -18,13 +18,13 @@
     (
       name: "Elmer Dema",
       id: "22211551",
-      email: "elmer.dema@stud.th-deg.de/ elmerdema2022@gmail.com"
+      email: "elmer.dema@stud.th-deg.de/ elmerdema2022@gmail.com",
     ),
   ),
   title: "QoE Prediction from Encrypted Traffic with MARINA on P4/Tofino",
   subtitle: "Supervisor: Prof. Dr. Andreas Kassler",
   date: datetime.today().display(),
-  version: none,         
+  version: none,
   thesis-compliant: true,
 
   // Format
@@ -32,7 +32,7 @@
     left: 3.5cm,
     right: 3.5cm,
     top: 3.5cm,
-    bottom: 3.5cm
+    bottom: 3.5cm,
   ),
   h1-spacing: 0.5em,
   line-spacing: 0.65em,
@@ -53,8 +53,8 @@
       name: "TH Deggendorf",
       street: "Dieter-Görlitz-Platz 1",
       city: "Deggendorf",
-      logo: image("assets/logo_thd.jpg")
-    ), 
+      logo: image("assets/logo_thd.jpg"),
+    ),
     cover-image: none,
     description: [
       Bachelor Thesis
@@ -62,7 +62,6 @@
     faculty: "Applied Informatics",
     programme: "Artificial Intelligence Bsc",
     semester: "WS2025",
-
     examiner: "Prof. Andreas Kassler",
     submission-date: datetime.today().display(),
   ),
@@ -76,19 +75,20 @@
 
   // Outlines
   outlines-indent: 1em,
-  depth-toc: 4,                     // Wenn `thesis-compliant` true ist, dann wird es auf 4 gesetzt wenn hier none steht
-  show-list-of-figures: false,      // Wird immer angezeigt, wenn `thesis-compliant` true ist
+  depth-toc: 4, // Wenn `thesis-compliant` true ist, dann wird es auf 4 gesetzt wenn hier none steht
+  show-list-of-figures: false, // Wird immer angezeigt, wenn `thesis-compliant` true ist
   show-list-of-abbreviations: true, // Achtung: Schlägt fehl wenn glossary leer ist und trotzdem dargestellt werden soll!
   list-of-abbreviations: abbreviations(),
   show-list-of-formulas: true, // Setze es auf false, wenn es nicht angezeigt werden soll
-  custom-outlines: ( // none
+  custom-outlines: (
+    // none
     (
-      title: none,   // required
-      custom: none   // required
+      title: none, // required
+      custom: none, // required
     ),
   ),
-  show-list-of-tables: true,   // Setze es auf false, wenn es nicht angezeigt werden soll
-  show-list-of-todos: false,    // Setze es auf false, wenn es nicht angezeigt werden soll
+  show-list-of-tables: true, // Setze es auf false, wenn es nicht angezeigt werden soll
+  show-list-of-todos: false, // Setze es auf false, wenn es nicht angezeigt werden soll
   literature-and-bibliography: bibliography(bib-file, title: none, style: "ieee", full: false),
 )
 
@@ -102,6 +102,6 @@
 
 #methodology()
 
-= Schluss/Zusammenfassung/Fazit<zusammenfassung>
+= Benchmarks<zusammenfassung>
 
 #summary()
