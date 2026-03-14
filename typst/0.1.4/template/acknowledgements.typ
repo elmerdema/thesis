@@ -23,7 +23,7 @@
   #v(4em)
   #align(center)[
     #text(size: 1.25em, style: "italic", weight: "semibold", fill: luma(80))[
-      "Quasimodo predicted all of this" \
+      "You know, Quasimodo predicted all of this" \
       #text(size: 0.8em, weight: "regular")[--- B.B.]
     ]
   ]
