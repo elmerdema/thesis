@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Marina Reporter Deploy Script (Fixed)
 ======================================
@@ -21,9 +20,7 @@ import math
 import time
 import glob
 
-# =============================================================================
 # CONFIGURATION
-# =============================================================================
 
 # Tofino logical port numbers (from bf_shell "pm show" D_P column)
 TOFINO_INGRESS_PORT = 8    # Logical port 8  (Physical 23) - receives from TRex
@@ -84,9 +81,7 @@ def mac_to_bytes(mac_str):
     return bytearray(int(x, 16) for x in mac_str.split(':'))
 
 
-# =============================================================================
 # Port configuration (replaces manual bfshell ucli/pm commands)
-# =============================================================================
 # Ports to enable: (logical_dev_port, speed, fec, autoneg)
 PORTS_CONFIG = [
     # Physical 23/0 (Logical 8)  - Ingress from Arista/TRex

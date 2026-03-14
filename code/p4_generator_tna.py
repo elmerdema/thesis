@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 P4 Code Generator for Tofino Native Architecture (TNA)
 Generates pForest random forest classifier for Intel Tofino switches
@@ -140,8 +139,7 @@ def generate_pforest_tna(num_trees, max_depth, certainty, output_file="p4src/pfo
             vote_patterns=vote_patterns,
         )
         
-        # Write to file
-        # Ensure directory exists
+
         output_dir = os.path.dirname(output_file)
         if output_dir and not os.path.exists(output_dir):
             os.makedirs(output_dir)

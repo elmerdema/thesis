@@ -102,7 +102,6 @@
     # Traffic IPs
     TRAFFIC_DST_IP = "192.168.100.1"
 
-    # =============================================================================
     # BF Runtime gRPC setup
     sde_install = os.environ.get('SDE_INSTALL', '/usr/local/sde')
     bfrt_location = '{}/lib/python*/site-packages/tofino'.format(sde_install)

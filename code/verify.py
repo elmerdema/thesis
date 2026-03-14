@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Tofino Verification Script
 ===========================
@@ -16,9 +15,7 @@ import sys
 import os
 import glob
 
-# =============================================================================
 # Connect to BFRT
-# =============================================================================
 sde_install = os.environ.get('SDE_INSTALL', '/usr/local/sde')
 bfrt_location = '{}/lib/python*/site-packages/tofino'.format(sde_install)
 try:
@@ -48,9 +45,7 @@ except Exception as e:
 bfrt_info = interface.bfrt_info_get('p4_marina_reporter')
 target = gc.Target(device_id=0, pipe_id=0xffff)
 
-# =============================================================================
-# 1. Check loaded P4 program
-# =============================================================================
+# Check loaded P4 program
 print("\n[1] P4 PROGRAM INFO")
 print("-" * 50)
 try:
@@ -70,9 +65,7 @@ try:
 except Exception as e:
     print(f"  Error listing tables: {e}")
 
-# =============================================================================
-# 2. Check Mirror Session
-# =============================================================================
+# Check Mirror Session
 print("\n[2] MIRROR SESSION CONFIG")
 print("-" * 50)
 try:
@@ -93,9 +86,7 @@ except Exception as e:
     print(f"  ERROR reading mirror session: {e}")
     print(f"  >>> Mirror session 1 may NOT be configured!")
 
-# =============================================================================
-# 3. Check Forward Table
-# =============================================================================
+# Check Forward Table
 print("\n[3] FORWARD TABLE ENTRIES")
 print("-" * 50)
 try:
@@ -113,9 +104,7 @@ try:
 except Exception as e:
     print(f"  Error: {e}")
 
-# =============================================================================
-# 4. Check Classification Table
-# =============================================================================
+#Check Classification Table
 print("\n[4] CLASSIFICATION TABLE ENTRIES")
 print("-" * 50)
 try:
@@ -134,9 +123,7 @@ try:
 except Exception as e:
     print(f"  Error: {e}")
 
-# =============================================================================
-# 5. Check Collector Table
-# =============================================================================
+# Check Collector Table
 print("\n[5] COLLECTOR TABLE ENTRIES")
 print("-" * 50)
 try:
@@ -163,9 +150,8 @@ if tbl_coll:
     except Exception as e:
         print(f"  Error: {e}")
 
-# =============================================================================
-# 6. Check IAT/Size Log Table entry counts
-# =============================================================================
+# Check IAT/Size Log Table entry counts
+
 print("\n[6] STATIC TABLE ENTRY COUNTS")
 print("-" * 50)
 for tbl_name in ['SwitchIngress.Marina.tbl_compute_iat_log',
@@ -180,9 +166,6 @@ for tbl_name in ['SwitchIngress.Marina.tbl_compute_iat_log',
     except Exception as e:
         print(f"  {tbl_name}: Error - {e}")
 
-# =============================================================================
-# 7. Try to read the egress parser info from context.json
-# =============================================================================
 print("\n[7] CHECKING P4 PARSER STRUCTURE")
 print("-" * 50)
 import json
@@ -224,9 +207,7 @@ else:
     print("  Could not find context.json - check manually:")
     print("  find / -name 'context.json' -path '*marina*' 2>/dev/null")
 
-# =============================================================================
-# 8. Check port counters
-# =============================================================================
+
 print("\n[8] PORT COUNTERS")
 print("-" * 50)
 try:
@@ -245,9 +226,6 @@ try:
 except Exception as e:
     print(f"  Error reading port stats: {e}")
 
-# =============================================================================
-# Summary
-# =============================================================================
 print("\n" + "=" * 70)
 print("VERIFICATION COMPLETE")
 print("=" * 70)
