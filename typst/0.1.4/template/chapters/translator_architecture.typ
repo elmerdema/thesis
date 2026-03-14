@@ -4,7 +4,7 @@
   == Data Plane Translator Architecture
   The "Translator" is the intelligent core of the proposed in-network telemetry system. While the Reporter component is responsible for aggregating flow statistics, the Translator consumes these statistics, executes a machine learning inference directly within the data plane, and enforces state-dependent routing policies.
 
-  Because standard decision trees rely on recursive branching (`if-else` structures) which are incompatible with the strict pipeline constraints of the Intel Tofino ASIC, the P4 program was automatically generated using a custom script (`p4_generator_tna.py`). This generator translates a trained Random Forest model into hardware-compatible Match-Action Tables (MATs).
+  Because standard decision trees rely on recursive branching (`if-else` structures) which are incompatible with the strict pipeline constraints of the Intel Tofino ASIC, the P4 program was automatically generated using a custom script (#link("https://github.com/elmerdema/thesis/blob/main/code/p4_generator_tna.py")[`p4_generator_tna.py`]). This generator translates a trained Random Forest model into hardware-compatible Match-Action Tables (MATs).
 
   #figure(
     image("../assets/translator.png", width: 100%),
@@ -23,7 +23,7 @@
   Once parsed, the `FeatureExtraction` control block maps the payload into the `local_metadata_t` structure. While features like `packet_count`, `ps_sum`, and `iat_sum` are extracted directly from the payload, the Translator dynamically calculates `jitter` on the fly. It does this by subtracting the flow's `last_packet_timestamp` (carried in the DTA header) from the switch's local hardware ingress timestamp (`ig_intr_md.ingress_mac_tstamp`).
 
   === Random Forest Hardware Mapping
-  To execute a Random Forest within the Tofino data plane, the `p4_generator_tna.py` script employs two critical design patterns: Ternary Match-Action mapping and Physical Stage Unrolling.
+  To execute a Random Forest within the Tofino data plane, the #link("https://github.com/elmerdema/thesis/blob/main/code/src/p4_generator_tna.py")[`p4_generator_tna.py`] script employs two critical design patterns: Ternary Match-Action mapping and Physical Stage Unrolling.
 
   ==== Ternary Range Matching (TCAM)
   Decision tree nodes evaluate features using inequalities (e.g., $X_"jitter" < 500$). The Tofino ASIC evaluates inequalities using Ternary Content-Addressable Memory (TCAM). The generator maps the decision thresholds into ternary bitmasks.
