@@ -305,7 +305,7 @@ def main():
     for flds in mirror_fields_by_action.values():
         all_known_fields.update(flds)
     print(f"  All discovered fields: {sorted(all_known_fields)}")
-    print(f"  Actions: {list(mirror_fields_by_action.keys()) or ['(none — actionless table)']}")
+    print(f"  Actions: {list(mirror_fields_by_action.keys()) or ['(none. actionless table)']}")
 
     # --- Action names to attempt (action-based and actionless) ---
     action_names_to_try = []
@@ -450,7 +450,7 @@ def main():
     # =========================================================================
     # 4. Forwarding Table
     #    ONLY forward test traffic (192.168.100.1) to port 16
-    #    DO NOT add 192.168.100.2 — that caused the packet loop!
+    #    DO NOT add 192.168.100.2 , that caused the packet loop!
     #    (DTA report packets with dst=192.168.100.2 already reach port 16
     #     via the mirror session; adding a forward entry re-forwards them
     #     when they loop back from the Arista, creating millions of frames)

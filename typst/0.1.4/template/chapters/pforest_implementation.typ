@@ -5,7 +5,7 @@
   Following the feature engineering chapter,  a simplified version of the **pForest** @busse_grawitz_pforest_in_network_inference architecture was adopted to enable in-network inference on the Intel Tofino switch.
   
   This part relies on the pre-processed datasets (`np_data.npy` (features) and `np_dummies.npy` (labels)) generated in the previous step. 
-  These file contain the  statistical snapshots required to train the decision trees.
+  These files contain the  statistical snapshots required to train the decision trees.
   
   #figure(
   caption: [Files for the Random Forest training logic],

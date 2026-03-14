@@ -9,7 +9,7 @@
   #figure(
     image("../assets/translator.png", width: 100%),
     caption: [
-      Translator/ is a DTA translator switch. This switch will intercept DTA reports and convert these into RDMA traffic. It is in charge of establishing and managing RDMA queue-pairs with the collector server.
+      Translator is a DTA translator switch. This switch will intercept DTA reports and convert these into RDMA traffic. It is in charge of establishing and managing RDMA queue-pairs with the collector server.
       #link("https://github.com/jonlanglet/DTA")[
         Source
       ]
@@ -58,7 +58,7 @@
 
   To bypass this, the generator "unrolls" the trees. If the Random Forest relies on trees with a maximum depth of 3, the generator creates three distinct tables per tree (e.g., `tbl_tree_0_stage_0`, `tbl_tree_0_stage_1`, `tbl_tree_0_stage_2`). In the `apply` block, these tables are executed sequentially, allowing the packet to traverse from the root to the leaf node across consecutive physical ALU stages.
 
-  === Ensemble Voting Mechanism
+  === Voting Mechanism
   Because a Random Forest consists of multiple independent decision trees (in this implementation, four trees), their individual predictions must be aggregated to form a final classification. This is handled by a dedicated `tbl_voting` match-action table.
 
   Instead of complex arithmetic averaging, which consumes valuable ALU cycles, the voting logic is pre-computed by the Python generator and hardcoded as exact-match entries. The table takes the four leaf outputs (`tree0_result` through `tree3_result`) as exact match keys and outputs the majority `final_class` alongside a confidence score (the vote tally).
@@ -87,7 +87,7 @@
   )
 
   === State-Dependent Routing and Deparsing
-  Once the `final_class` is resolved, the Translator leverages this intelligence to perform Quality of Experience (QoE) or security routing. This is governed by the `tbl_classification_action` table.
+  Once the `final_class` is resolved, the Translator uses this result to perform Quality of Experience (QoE) or security routing. This is controlled by the `tbl_classification_action` table.
 
   If the traffic is classified as benign (Class 0), the switch executes `forward_benign` and routes the traffic along its normal path (e.g., egress port 36). However, if the traffic is classified as critical or malicious (Class 1), the switch can execute dynamic mitigation strategies, such as `forward_to_ids` (redirecting the packet to port 64 for deep packet inspection) or `drop_malicious` to quarantine the flow entirely at line rate.
 

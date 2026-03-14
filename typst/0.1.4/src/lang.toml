@@ -61,6 +61,7 @@ user-story-title = "Title"
 user-story-acceptance-criteria = "Acceptance Criteria"
 
 # Headings
+acknowledgements = "Acknowledgements"
 abstract = "Abstract"
 list-of-figures = "List of Figures"
 list-of-abbreviations = "List of Abbreviations"
@@ -129,6 +130,7 @@ user-story-title = "Titel"
 user-story-acceptance-criteria = "Akzeptanzkriterien"
 
 # Headings
+acknowledgements = "Danksagung"
 abstract = "Abstract"
 list-of-figures = "Abbildungsverzeichnis"
 list-of-abbreviations = "Abkürzungsverzeichnis"

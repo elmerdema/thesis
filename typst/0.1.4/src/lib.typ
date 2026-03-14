@@ -77,6 +77,9 @@
     genitive-of-university: none                 // required
   ),
 
+  // Acknowledgements
+  acknowledgements: none,
+
   // Abstract
   abstract: none,
 
@@ -270,6 +273,14 @@
   }
 
   counter(page).update(1)
+
+  // Acknowledgements
+  if is-not-none-or-empty(acknowledgements) {
+    roman-page[
+      #heading(depth: 1, bookmarked: true)[ #get-heading-str("acknowledgements") ]
+      #acknowledgements
+    ]
+  }
 
   // Abstract
   if is-not-none-or-empty(abstract) {

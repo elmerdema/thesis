@@ -1,10 +1,10 @@
 #let control_plane_configuration() = [
   #set par(first-line-indent: 1em, spacing: 1.2em, justify: true)
 
-  === Control Plane Configuration: Streamlined Forwarding
+  === Control Plane Configuration:  Forwarding
   In a Software-Defined Networking (SDN) architecture using P4, compiling and loading the program onto the Tofino ASIC only defines the pipeline's structure. Upon initialization, the match-action tables within the data plane are entirely empty, meaning the switch will default to dropping all incoming packets. To establish connectivity within the hardware-in-the-loop testbed, a control plane application is required to populate the forwarding tables.
 
-  For this evaluation, a streamlined Python script was developed utilizing the Barefoot Runtime (BFRT) gRPC interface. Unlike full deployment scripts that initialize the entire ML pipeline, telemetry thresholds, and routing logic simultaneously, this script was intentionally decoupled to focus exclusively on the `tbl_forward` table.
+  For this evaluation, a Python script was developed utilizing the Barefoot Runtime (BFRT) gRPC interface. Unlike full deployment scripts that initialize the entire ML pipeline, telemetry thresholds, and routing logic simultaneously, this script was intentionally decoupled to focus exclusively on the `tbl_forward` table.
 
   === Isolated Forwarding Table Configuration
   The decision to isolate the forwarding logic was driven by the need for modularity during testing. By removing the overhead of configuring the entire P4 pipeline, this script allows for rapid, incremental updates to the routing topology without resetting the switch's telemetry or machine learning states. This is particularly advantageous during debugging or when switching between the "Reporter" and "Translator" testing phases, as it guarantees that basic Layer 3 forwarding remains intact regardless of the data plane's experimental features.

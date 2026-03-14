@@ -1,5 +1,6 @@
 #import "lib.typ": *
 
+#import "acknowledgements.typ": acknowledgements
 #import "abstract.typ": abstract
 #import "abbreviations.typ": abbreviations
 
@@ -70,6 +71,7 @@
   custom-declaration: image("assets/form.pdf", width: 100%, height: 100%),
   declaration-on-the-final-thesis: none,
 
+  acknowledgements: acknowledgements(),
   abstract: abstract(),
 
   // Outlines
