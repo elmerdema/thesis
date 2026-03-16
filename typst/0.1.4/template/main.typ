@@ -47,7 +47,7 @@
   background-color: light-blue,
 
   // Cover sheet
-  custom-cover-sheet: none,
+  custom-cover-sheet: image("assets/thd_template.pdf", width: 100%, height: 100%),
   cover-sheet: (
     university: (
       name: "TH Deggendorf",
