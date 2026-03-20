@@ -8,9 +8,10 @@
 // cd C:\Users\Administrator\Desktop\thesis\typst\0.1.4
 //typst watch --root . template/main.typ
 #import "chapters/introduction.typ": introduction
-#import "chapters/methodology.typ": methodology
-#import "chapters/summary.typ": summary
-
+#import "chapters/related_work.typ": related_work
+#import "chapters/design.typ": design
+#import "chapters/implementation.typ": implementation
+#import "chapters/evaluation.typ": evaluation
 
 #show: project.with(
   lang: "en",
@@ -98,10 +99,14 @@
 
 #introduction()
 
-= Methodology
+= Related Work
+#related_work()
 
-#methodology()
+= Design & Methodology
+#design()
 
-= Benchmarks<zusammenfassung>
+= Implementation
+#implementation()
 
-#summary()
+= Evaluation
+#evaluation()

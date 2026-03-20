@@ -1,16 +1,11 @@
-#import "reporter_architecture.typ": reporter_architecture
-#import "modeling_pipeline.typ": modeling_pipeline
 #import "pforest_implementation.typ": pforest_implementation
-#import "translator_architecture.typ": translator_architecture
-#import "translator_evaluation.typ": translator_evaluation
 #import "control_plane.typ": control_plane_configuration
-#let methodology() = [
 
+#let implementation() = [
   #set par(first-line-indent: 1em, spacing: 1.2em, justify: true)
 
-  #reporter_architecture("../assets/reporter.jpg")
 
-  == Dataset analysis
+  == Dataset Analysis
   The dataset used in this thesis originates from #link("https://zenodo.org/records/14724247")[Karagkioules et al. paper.]
   The dataset is designed to fill this gap by providing measurements that were simultaneously obtained at the network, transport, and application layers. The data were generated using YouTube’s native Android application on two smartphone models at two locations in Europe over a period of more than five months.
 
@@ -78,7 +73,6 @@
     caption: [Pandas resampling operation to aggregate packet-level metrics into 50ms time windows.],
   )
 
-  #pagebreak()
   First, specific metrics were calculated for every packet $i$ in the stream. The Inter-Arrival Time ($"IAT"$) was derived as the difference in timestamps between consecutive packets. Jitter was calculated as the absolute difference between consecutive IAT values. To capture the higher-order statistical properties of the traffic flow, the second and third moments (squares and cubes) were computed for both packet size ($"PS"$) and $"IAT"$.
 
   #figure(
@@ -169,14 +163,12 @@
     caption: [Summary statistics for Jitter and Buffer Level across the processed dataset.],
   ) <tab:dataset_summary>
 
-  #pagebreak()
   === Target Alignment and Dataset Construction
   The final stage of the pipeline merged the high-frequency network features with the lower-frequency application labels. Since the application statistics (Buffer Level and BWE) were logged at irregular intervals, a standard join was insufficient. Instead, a `merge_asof` (nearest key) strategy was implemented.
 
   For each 50ms feature window, the system located the nearest application log entry. A strict tolerance limit of *100ms* was enforced; if no application label existed within 100ms of the window's timestamp, the sample was discarded. This ensured that the model would not learn from stale state information.
 
   Post-merge, the dataset underwent a cleaning phase where any rows containing `NaN` values for the target variables were dropped. The final output consisted of a CSV file containing approximately 163,000 samples, encompassing the feature vector, the target labels, and identifiers for the video and iteration.
-
 
   #figure(
     grid(
@@ -187,16 +179,7 @@
     caption: [ (Left) Feature distributions (log scale); (Right) Bandwidth vs Buffer Level over time.],
   )
 
-  #modeling_pipeline()
-
   #pforest_implementation()
 
-  #pagebreak()
-  #translator_architecture()
-
-  #pagebreak()
-  #translator_evaluation()
-
   #control_plane_configuration()
-
 ]
