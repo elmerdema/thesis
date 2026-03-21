@@ -16,10 +16,7 @@
 
   However, this improvement in ML metrics comes at a steep cost in terms of hardware resources. The compiler reports indicate that SRAM, TCAM, and specifically VLIW instruction slots scale rapidly as $k$ increases. The physical limit of 20 pipeline stages on the Tofino 2 architecture becomes a hard bottleneck, as demonstrated in the stage utilization heatmaps.
 
-  #figure(
-    image("../assets/benchmarks/03_stage_utilisation_heatmap.png", width: 100%),
-    caption: [Per-stage resource utilization heatmaps showing the rapid consumption of available pipeline stages.],
-  )
+
 
   == Tree and Depth Configuration Sweep
   The second experiment systematically sweeps the number of trees and the maximum depth of the Random Forest. While larger and deeper forests naturally yield higher test accuracies and better recall, they strain the P4 compiler's ability to fit the logic within the limited hardware stages.

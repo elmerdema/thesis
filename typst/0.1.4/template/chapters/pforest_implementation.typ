@@ -32,10 +32,10 @@
   To ensure the trained model can be compiled to the P4 data plane, the script performs two critical adaptations:
 
   + *Hardware-Constrained Feature Selection:* Although the initial dataset contains a rich set of features, the Tofino switch cannot efficiently track high-dimensional state vectors for every flow without exhausting memory. Consequently, the training script explicitly reduces the feature space to the four most impactful metrics identified during the preliminary analysis:
-    - Index 0: `packet_count`
     - Index 1: `ps_sum` (Traffic Volume)
-    - Index 2: `iat_sum` (Inter-Arrival Time Sum)
-    - Index 3: `jitter`
+    - Index 2: `ps2_sum` (Traffic Volume Squared)
+    - Index 3: `ps3_sum` (Traffic Volume Cubed)
+    - Index 7: `jitter`
 
   + *Hyperparameter Tying:* The model complexity is controlled via `num_trees` and `max_depth`. In this context, `max_depth` dictates the number of pipeline stages required for a decision, while `num_trees` impacts the parallel lookup width.
 
@@ -48,8 +48,8 @@
     labels = np.load(\".../storage/np_dummies.npy\", allow_pickle=True)
 
     # REDUCED: Select only top 4 features to fit Tofino constraints
-    # Indices: 0=packet_count, 1=ps_sum, 2=iat_sum, 3=jitter
-    feature_indices = [0, 1, 2, 3]
+    # Indices: 1=ps_sum, 2=ps2_sum, 3=ps3_sum, 7=jitter
+    feature_indices = [1, 2, 3, 7]
     features = features[:, feature_indices]
 
     rf = RandomForestClassifier(n_estimators=num_trees, max_depth=max_depth)

@@ -60,23 +60,6 @@
   === Feature Engineering and Windowing
   The transformation from raw packet logs to model-ready features involved computing instantaneous metrics followed by a temporal aggregation. The system used a non-overlapping time window of *50ms*.
 
-  #figure(
-    box(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
-      #set align(left)
-      ```python
-      TIME_WINDOW = '50ms'
-
-      #agg_rules defines how to aggregate each metric within the time window
-      #this includes sums for traffic volume and moments, as well as counts for packet occurrences
-      features_df = packets_df.resample(TIME_WINDOW).agg(agg_rules)
-      features_df.columns = [
-          'ps_sum', 'packet_count', 'ps2_sum', 'ps3_sum',
-          'iat_sum', 'iat2_sum', 'iat3_sum', 'jitter_sum'
-      ]
-      ```
-    ],
-    caption: [Pandas resampling operation to aggregate packet-level metrics into 50ms time windows.],
-  )
 
   #pagebreak()
   First, specific metrics were calculated for every packet $i$ in the stream. The Inter-Arrival Time ($"IAT"$) was derived as the difference in timestamps between consecutive packets. Jitter was calculated as the absolute difference between consecutive IAT values. To capture the higher-order statistical properties of the traffic flow, the second and third moments (squares and cubes) were computed for both packet size ($"PS"$) and $"IAT"$.
