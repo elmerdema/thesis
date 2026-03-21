@@ -69,33 +69,6 @@
 
   The pForest script is managed by a single main function, `generate_full_p4_code`. This function accepts the model's structural hyperparameters (`num_trees`, `max_depth`) and sequentially assembles the pipeline components: identifying necessary headers, generating the "physically unrolled" match-action tables for the decision trees, and constructing the static voting logic.
 
-  #figure(
-    caption: [The main driver function of the generator script, demonstrating the modular assembly of the P4 pipeline.],
-    raw(
-      block: true,
-      lang: "python",
-      "def generate_full_p4_code(num_trees=4, max_depth=3):
-    \"\"\"Generate complete P4 code optimized for Tofino\"\"\"
-
-    feature_names = ['packet_count', 'ps_sum', 'iat_sum', 'jitter']
-
-    p4_code = '''/* Generated P4_16 for Tofino */
-#include <core.p4>
-#include <tna.p4>
-'''
-    # Modular generation of pipeline stages
-    p4_code += generate_p4_headers()
-    p4_code += generate_parser()
-    p4_code += generate_feature_extraction()
-    # Generates the Random Forest logic (Tables + Actions)
-    p4_code += generate_classification_control(num_trees, feature_names, max_depth)
-    p4_code += generate_forwarding_logic_and_ingress()
-    p4_code += generate_deparser()
-    p4_code += generate_pipeline()
-
-    return p4_code",
-    ),
-  )
 
   The final output is written to `rf_classifier_dta_marina.p4`, producing a fully compilable network program that integrates the specific Random Forest logic into the switch's standard forwarding behavior.
 ]

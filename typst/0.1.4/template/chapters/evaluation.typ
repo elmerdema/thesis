@@ -7,7 +7,7 @@
   #translator_evaluation()
 
   == Benchmarking and Performance Analysis
-  This section presents the results of the benchmarking framework developed to evaluate the practical limits of in-network QoE prediction. The automated pipeline, driven by the #link("https://github.com/elmerdema/thesis/blob/main/code/benchmark.py")[`code/benchmark.py`] script, trains Random Forest models with varying hyperparameters, translates them into P4 code, and utilizes the Intel SDE compiler to evaluate architectural resource consumption.
+  This section presents the results of the benchmarking framework developed to evaluate the practical limits of in-network QoE prediction. The automated pipeline, which is implemented in the #link("https://github.com/elmerdema/thesis/blob/main/code/benchmark.py")[`code/benchmark.py`] script, trains Random Forest models with varying hyperparameters, translates them into P4 code, and utilizes the Intel SDE compiler to evaluate architectural resource consumption.
 
   === Feature Scaling and Hardware Constraints
   The first major experiment evaluates the impact of the number of telemetry features ($k$) on both Machine Learning (ML) performance and hardware resource utilization. As shown in the benchmarking plots, increasing the number of features allows the Random Forest to capture more complex patterns in the traffic, improving accuracy and the F1 score.

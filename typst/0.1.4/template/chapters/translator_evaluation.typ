@@ -14,7 +14,7 @@
   #figure(
     image("../assets/pcap.png", width: 80%),
     caption: [
-      Pcap file inspected with pcapviewer extension (VsCode)
+      Pcap file inspected with pcapviewer extension
     ],
   )
 
@@ -29,23 +29,6 @@
 
   Crucially, because the IP and UDP headers are modified, the script explicitly deletes the existing checksums, forcing Scapy to recalculate them before transmission. This ensures the packets are not dropped by the switch due to checksum validation failures.
 
-  #figure(
-    box(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
-      #set align(left)
-      ```python
-      for pkt in packets:
-          if UDP in pkt and pkt[UDP].dport == DTA_UDP_PORT:
-              # Rewrite MACs for the live testbed topology
-              pkt[Ether].src = TREX_TX_MAC
-              pkt[Ether].dst = TOFINO_MAC
-
-              # Force checksum recalculation after header modification
-              if IP in pkt: del pkt[IP].chksum
-              del pkt[UDP].chksum
-      ```
-    ],
-    caption: [Scapy packet manipulation logic to adapt saved DTA PCAPs for live replay.],
-  )
 
   === Timing Preservation
   Machine learning models analyzing network traffic, especially those utilizing features like jitter, Inter-Arrival Time (IAT), and Exponential Moving Averages (EMA), are highly sensitive to temporal dynamics. Replaying the PCAP file as a single high-speed burst would compress the time windows and invalidate the ML classification.

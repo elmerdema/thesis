@@ -33,7 +33,7 @@
   #figure(
     box(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
       #set align(left)
-      ```cpp
+      ```p4
       table tbl_tree_0_stage_0 {
           key = {
               local_md.classification_variables.current_node_tree0: exact;
@@ -66,7 +66,7 @@
   #figure(
     box(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
       #set align(left)
-      ```cpp
+      ```p4
       table tbl_voting {
           key = {
               local_md.tree0_result : exact;
