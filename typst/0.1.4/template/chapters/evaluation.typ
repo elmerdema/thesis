@@ -72,7 +72,7 @@
   First, the MARINA feature pipeline was successfully adapted for in-network deployment.
   By reducing the feature space to four hardware-feasible metrics (`ps_sum`, `ps2_sum`,
   `ps3_sum`, and `jitter`) and aggregating them over non-overlapping 50ms windows,
-  the system achieved a classification accuracy of 0.76 with an F1-score of 0.80 for the
+  the system achieved a classification accuracy of 0.76 (15 percentage points above the majority-class baseline) with an F1-score of 0.80 for the
   critical *At\_Risk* class. This demonstrates that a small, carefully selected feature
   subset can retain the majority of predictive power while remaining deployable on hardware.
 
@@ -195,8 +195,8 @@
   === Limitations and Future Work
 
   Despite these results, several limitations should be acknowledged. The model was
-  trained and evaluated on a single scenario (Scenario 6) of the Würzburg QoE dataset,
-  which captures YouTube traffic on Android devices in European network conditions.
+  trained and evaluated on a single scenario (Scenario 6, automatic quality selection) of the Würzburg QoE dataset.
+  The dataset contains 7 other scenarios (Scenarios 1-5, 7, 8) that introduce various network degradations like rate-limiting and delay. Evaluating on these rate-limited scenarios would likely induce distribution shifts; specifically, rate-limited scenarios trigger more extreme buffer drops, meaning more *At\_Risk* events and potentially inflated recall.
   Generalizability to other platforms (e.g., Netflix, Twitch), transport protocols (e.g.,
   QUIC-based streaming), or network environments (e.g., high-latency satellite links)
   remains to be validated.

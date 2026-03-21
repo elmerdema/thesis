@@ -20,7 +20,7 @@
 
 
   === Phase 2: Translator Inference Testing
-  In the second phase, the Tofino switch was reprogrammed with the "Translator" P4 program, which includes the embedded Random Forest ML tables. The objective was to replay the previously captured DTA packets through the Translator to verify if the switch could correctly classify the QoE state in real-time, append the classification result to the packet header, and execute state-dependent routing decisions.
+  In the second phase, the Tofino switch was reprogrammed with the "Translator" P4 program, which includes the embedded Random Forest ML tables. The objective was to replay the previously captured DTA packets through the Translator to determine whether the switch could correctly classify the QoE state in real-time, append the classification result to the packet header, and execute state-dependent routing decisions.
 
   To automate this, a custom Python testing framework (#link("https://github.com/elmerdema/thesis/blob/main/code/traffic_gen_translator.py")[`traffic_gen_translator.py`]) was developed utilizing the TRex Stateless (STL) API and the Scapy packet manipulation library.
 

@@ -2,7 +2,7 @@
   #set par(first-line-indent: 1em, spacing: 1.2em, justify: true)
 
   == Evolution of the Methodology
-  The initial phase of this research focused on establishing a baseline classification model using "Marina-style" statistical features @marina_paper, where packet sizes and inter-arrival times were aggregated into isolated 50ms time windows using sums and moments. This earlier approach treated every time window as an independent event, relying on a simplistic labeling strategy that categorized network states solely based on the slope of buffer changes (filling versus depleting) without regard for the absolute buffer level.
+  The initial phase of this research focused on establishing a baseline classification model using MARINA statistical features @marina_paper, where packet sizes and inter-arrival times were aggregated into isolated 50ms time windows using sums and moments. This earlier approach treated every time window as an independent event, relying on a simplistic labeling strategy that categorized network states solely based on the slope of buffer changes (filling versus depleting) without regard for the absolute buffer level.
 
   While this established a foundational correlation between traffic volume and buffer trends, the model lacked temporal context. It could not distinguish between a sudden, transient traffic drop and a sustained outage, nor could it differentiate between a benign buffer drop from a high level and a critical depletion event leading to a video stall.
 
@@ -42,7 +42,7 @@
   === Target Class Definition: Risk-Based QoE State
   A supervised learning approach requires defined target labels. The existing approach defines a **binary classification scheme**. A "Lookahead" mechanism was implemented to inspect the buffer state 10 steps (500ms) into the future. By comparing the future buffer level ($B_{t+10}$) with the current level ($B_t$), a slope was calculated.
 
-  The 'At_Risk' class is defined as a significant depleting trend occurring when the buffer is dropping by more than a set threshold. This allows the model to prioritize the detection of QoE violations over simple fluctuations.
+  The 'At_Risk' class is defined as a depleting trend occurring when the buffer is dropping by more than a set threshold. This allows the model to prioritize the detection of QoE violations over simple fluctuations.
 
   #figure(
     box(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
@@ -68,11 +68,11 @@
   To establish a baseline for classification performance, a Random Forest Classifier was trained using 150 estimators and a maximum depth of 12. To mitigate the extreme class imbalance, the model utilized `class_weight='balanced'`, which penalizes misclassification of the minority class ("Steady") more heavily.
 
   The input feature vector $X$ for this baseline experiment was reduced to four core metrics: `ps_sum`, `ps2_sum`, `ps3_sum`, and `jitter`.#footnote[
-    This initial experiment focused on core traffic metrics to establish a performance baseline. Other features can be used as well, however the trained model might not fit on resource-constrained devices like P4 switches.
+    This initial experiment focused on core traffic metrics to establish a performance baseline.
   ]
 
   === Performance Evaluation
-  The model was evaluated on a stratified test set (25% split). As shown in the classification report, the model demonstrated solid performance, correctly predicting the 'At_Risk' class with an F1-score of 0.80 and the 'Steady' class with an F1-score of 0.69. The overall accuracy reached 0.76.
+  The model was evaluated on a stratified test set (25% split). As shown in the classification report, the model demonstrated accuracy of 0.76, correctly predicting the 'At_Risk' class with an F1-score of 0.80 and the 'Steady' class with an F1-score of 0.69.
 
   #figure(
     table(

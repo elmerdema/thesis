@@ -4,7 +4,7 @@
   == Model Training via pForest
   Following the feature engineering chapter,  a simplified version of the **pForest** @busse_grawitz_pforest_in_network_inference architecture was adopted to enable in-network inference on the Intel Tofino switch.
 
-  This part relies on the pre-processed datasets (`np_data.npy` (features) and `np_dummies.npy` (labels)) generated in the previous step.
+  This phase uses the pre-processed datasets (`np_data.npy` (features) and `np_dummies.npy` (labels)) from the previous step.
   These files contain the  statistical snapshots required to train the decision trees.
 
   #figure(
@@ -27,7 +27,7 @@
 
   === The Training Pipeline (#link("https://github.com/elmerdema/thesis/blob/main/code/rf_model.py")[`rf_model.py`])
   The training logic is found in the #link("https://github.com/elmerdema/thesis/blob/main/code/src/randomforest/rf_model.py")[`rf_model.py`] script. While it imports the standard `scikit` library, the pipeline is constrained by the hardware limitations of the Tofino architecture,
-  specifically the available Match-Action Table (MAT) resources and SRAM capacity.#footnote[#link("https://www.intel.com/content/www/us/en/products/sku/218647/intel-tofino-2-6-4-tbps-4-pipelines/specifications.html")[Intel Tofino 1] has around ~10–12 MB of SRAM, while Tofino 2 explicitly includes 64 MB of shared on-chip packet memory ]
+  specifically the available Match-Action Table (MAT) resources and SRAM capacity.#footnote[#link("https://www.intel.com/content/www/us/en/products/sku/218647/intel-tofino-2-6-4-tbps-4-pipelines/specifications.html")[Intel Tofino 1] has around 10 Mbit of SRAM per stage, while Tofino 2 explicitly includes 16 Mbit per stage. ]
 
   To ensure the trained model can be compiled to the P4 data plane, the script performs two critical adaptations:
 

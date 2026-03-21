@@ -61,7 +61,7 @@
   === Voting Mechanism
   Because a Random Forest consists of multiple independent decision trees (in this implementation, four trees), their individual predictions must be aggregated to form a final classification. This is handled by a dedicated `tbl_voting` match-action table.
 
-  Instead of complex arithmetic averaging, which consumes valuable ALU cycles, the voting logic is pre-computed by the Python generator and hardcoded as exact-match entries. The table takes the four leaf outputs (`tree0_result` through `tree3_result`) as exact match keys and outputs the majority `final_class` alongside a confidence score (the vote tally).
+  To conserve limited Arithmetic Logic Unit (ALU) cycles, the voting logic is pre-computed by the Python generator and hardcoded as exact-match entries. The table takes the four leaf outputs (`tree0_result` through `tree3_result`) as exact match keys and outputs the majority `final_class` alongside a confidence score (the vote tally).
 
   #figure(
     box(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
