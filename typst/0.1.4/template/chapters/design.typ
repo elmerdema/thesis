@@ -10,5 +10,6 @@
 
   #translator_architecture()
 
+  #pagebreak()
   #modeling_pipeline()
 ]

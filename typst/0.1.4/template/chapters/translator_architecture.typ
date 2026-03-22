@@ -63,28 +63,7 @@
 
   To conserve limited Arithmetic Logic Unit (ALU) cycles, the voting logic is pre-computed by the Python generator and hardcoded as exact-match entries. The table takes the four leaf outputs (`tree0_result` through `tree3_result`) as exact match keys and outputs the majority `final_class` alongside a confidence score (the vote tally).
 
-  #figure(
-    box(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
-      #set align(left)
-      ```p4
-      table tbl_voting {
-          key = {
-              local_md.tree0_result : exact;
-              local_md.tree1_result : exact;
-              local_md.tree2_result : exact;
-              local_md.tree3_result : exact;
-          }
-          actions = { resolve_vote; NoAction; }
-          const entries = {
-              (0, 0, 0, 0) : resolve_vote(0, 4, 0); // 4 votes for class 0
-              (1, 1, 1, 0) : resolve_vote(1, 1, 3); // 3 votes for class 1
-              // ... exhaustively generated permutations
-          }
-      }
-      ```
-    ],
-    caption: [Hardcoded ensemble voting logic utilizing an Exact Match table for instantaneous majority resolution.],
-  )
+
 
   === State-Dependent Routing and Deparsing
   Once the `final_class` is resolved, the Translator uses this result to perform Quality of Experience (QoE) or security routing. This is controlled by the `tbl_classification_action` table.
