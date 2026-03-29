@@ -46,7 +46,7 @@
     caption: [Regular expression pattern used to extract packet arrival times and payload lengths.],
   )
 
-  In contrast, the application logs required a two-step parsing process. The parser first identified lines containing JSON objects embedded within the log text. It then extracted the JSON string, corrected formatting inconsistencies (such as trailing braces), and parsed the object to retrieve the ground-truth labels: Bandwidth Estimate (#code("bwe")) and Buffer Level (#code("buffer_level_ms")).
+  In contrast, the application logs required a two-step parsing process. The parser first identified lines containing JSON objects embedded within the log text. It then extracted the JSON string, corrected formatting inconsistencies (such as trailing braces), and parsed the object to retrieve the ground-truth labels: Bandwidth Estimate (`bwe`) and Buffer Level (`buffer_level_ms`).
 
   === Synchronization and Preprocessing
   A critical challenge in this pipeline was aligning the timelines of the two data sources. The application logs recorded timestamps in a timezone differing from the network traces. To rectify this, a one-hour offset was added to the application statistics indices ($bold(t_"stats" + 1"h")$).
@@ -62,14 +62,14 @@
 
   #figure(
     $ "IAT"_i = t_i - t_(i-1) $,
-    caption: [Inter-Arrival Time between consecutive packets $i-1$ and $i$, where $t_i$ is the arrival timestamp of packet $i$.],
+    caption: [#abbr("iat") between consecutive packets $i-1$ and $i$, where $t_i$ is the arrival timestamp of packet $i$.],
     kind: "formula",
     supplement: "Formula",
   )
 
   #figure(
     $ J_i = |"IAT"_i - "IAT"_(i-1)| $,
-    caption: [Instantaneous jitter, defined as the absolute difference between consecutive Inter-Arrival Times.],
+    caption: [Instantaneous jitter, defined as the absolute difference between consecutive #abbr("iat").],
     kind: "formula",
     supplement: "Formula",
   )
@@ -149,11 +149,11 @@
   ) <tab:dataset_summary>
 
   === Target Alignment and Dataset Construction
-  The final stage of the pipeline merged the high-frequency network features with the lower-frequency application labels. Since the application statistics (Buffer Level and #abbr("bwe")) were logged at irregular intervals, a standard join was insufficient. Instead, a #code("merge_asof") strategy was implemented.
+  The final stage of the pipeline merged the high-frequency network features with the lower-frequency application labels. Since the application statistics (Buffer Level and #abbr("bwe")) were logged at irregular intervals, a standard join was insufficient. Instead, a `merge_asof` strategy was implemented.
 
   For each 50ms feature window, the system located the nearest application log entry. A strict tolerance limit of *100ms* was enforced; if no application label existed within 100ms of the window's timestamp, the sample was discarded. This ensured that the model would not learn from stale state information.
 
-  Post-merge, the dataset underwent a cleaning phase where any rows containing #code("NaN") values for the target variables were dropped. The final output consisted of a CSV file containing approximately 163,000 samples, encompassing the feature vector, the target labels, and identifiers for the video and iteration.
+  Post-merge, the dataset underwent a cleaning phase where any rows containing `NaN` values for the target variables were dropped. The final output consisted of a CSV file containing approximately 163,000 samples, encompassing the feature vector, the target labels, and identifiers for the video and iteration.
 
   #figure(
     grid(

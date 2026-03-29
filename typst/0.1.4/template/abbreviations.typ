@@ -224,4 +224,22 @@
     description: none,
     group: "",
   ),
+  (
+    key: "sram",
+    short: "SRAM",
+    plural: "",
+    long: "Static Random-Access Memory",
+    longplural: "",
+    description: none,
+    group: "",
+  ),
+  (
+    key: "vliw",
+    short: "VLIW",
+    plural: "",
+    long: "Very Long Instruction Word",
+    longplural: "",
+    description: none,
+    group: "",
+  ),
 )

@@ -3,7 +3,7 @@
   #set par(first-line-indent: 1em, spacing: 1.2em, justify: true)
 
   == Evolution of the Methodology
-  The initial phase of this research focused on establishing a baseline classification model using MARINA statistical features @marina_paper, where packet sizes and inter-arrival times were aggregated into isolated 50ms time windows using sums and moments. This earlier approach treated every time window as an independent event, relying on a simplistic labeling strategy that categorized network states solely based on the slope of buffer changes (filling versus depleting) without regard for the absolute buffer level.
+  The initial phase of this research focused on establishing a baseline classification model using MARINA statistical features @marina_paper, where packet sizes and #abbr("iat") times were aggregated into isolated 50ms time windows using sums and moments. This earlier approach treated every time window as an independent event, relying on a simplistic labeling strategy that categorized network states solely based on the slope of buffer changes (filling versus depleting) without regard for the absolute buffer level.
 
   While this established a foundational correlation between traffic volume and buffer trends, the model lacked temporal context. It could not distinguish between a sudden, transient traffic drop and a sustained outage, nor could it differentiate between a benign buffer drop from a high level and a critical depletion event leading to a video stall.
 
@@ -63,12 +63,12 @@
     caption: [Logic used to define the ground-truth #abbr("qoe") target classes.],
   )
 
-  The resulting class distribution represents #code("At_Risk") instances dominating the dataset (61.3%) compared to #code("Steady") stable samples (38.7%).
+  The resulting class distribution represents `At_Risk` instances dominating the dataset (61.3%) compared to `Steady` stable samples (38.7%).
 
   == Preliminary Modeling and Feature Importance
-  To establish a baseline for classification performance, a Random Forest Classifier was trained using 150 estimators and a maximum depth of 12. To mitigate the extreme class imbalance, the model utilized #code("class_weight='balanced'"), which penalizes misclassification of the minority class ("Steady") more heavily.
+  To establish a baseline for classification performance, a #abbr("rf") Classifier was trained using 150 estimators and a maximum depth of 12. To mitigate the extreme class imbalance, the model utilized `class_weight='balanced'`, which penalizes misclassification of the minority class ("Steady") more heavily.
 
-  The input feature vector $X$ for this baseline experiment was reduced to four core metrics: #code("ps_sum"), #code("ps2_sum"), #code("ps3_sum"), and #code("jitter").#footnote[
+  The input feature vector $X$ for this baseline experiment was reduced to four core metrics: `ps_sum`, `ps2_sum`, `ps3_sum`, and `jitter`.#footnote[
     This initial experiment focused on core traffic metrics to establish a performance baseline.
   ]
 
@@ -85,11 +85,11 @@
       [At_Risk], [0.80], [0.80], [0.80],
       [Steady], [0.69], [0.69], [0.69],
     ),
-    caption: [Random Forest performance metrics for #abbr("qoe") state classification.],
+    caption: [#abbr("rf") performance metrics for #abbr("qoe") state classification.],
   )
 
   === Feature Importance Analysis
-  The Random Forest provided insights into feature relevance. The Gini importance scores revealed that the higher-order statistical moments of traffic volume (#code("ps2_sum"), #code("ps3_sum")) and the aggregate traffic volume (#code("ps_sum")) were the most significant predictors of the buffer's future state, collectively accounting for over 62% of the model's decision-making power.
+  The #abbr("rf") provided insights into feature relevance. The Gini importance scores revealed that the higher-order statistical moments of traffic volume (`ps2_sum`, `ps3_sum`) and the aggregate traffic volume (`ps_sum`) were the most significant predictors of the buffer's future state, collectively accounting for over 62% of the model's decision-making power.
 
   #figure(
     table(
@@ -98,13 +98,13 @@
       align: (col, row) => if col == 0 { left } else { right },
       fill: (col, row) => if row == 0 { luma(230) } else { none },
       [*Feature*], [*Importance Score*],
-      [Traffic Volume Squared (#code("ps2_sum"))], [0.244],
-      [Traffic Volume Cubed (#code("ps3_sum"))], [0.197],
-      [Traffic Volume (#code("ps_sum"))], [0.184],
-      [Jitter (#code("jitter"))], [0.117],
+      [Traffic Volume Squared (`ps2_sum`)], [0.244],
+      [Traffic Volume Cubed (`ps3_sum`)], [0.197],
+      [Traffic Volume (`ps_sum`)], [0.184],
+      [Jitter (`jitter`)], [0.117],
     ),
-    caption: [Feature importance ranking derived from the Random Forest model.],
+    caption: [Feature importance ranking derived from the #abbr("rf") model.],
   )
 
-  Finally, the processed feature matrix $X$ and the one-hot encoded target variables $Y$ were exported as NumPy arrays (#code(".npy")) to facilitate ingestion into deep learning frameworks for subsequent experiments.
+  Finally, the processed feature matrix $X$ and the one-hot encoded target variables $Y$ were exported as NumPy arrays (`.npy`) to facilitate ingestion into deep learning frameworks for subsequent experiments.
 ]

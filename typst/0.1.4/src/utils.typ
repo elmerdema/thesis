@@ -104,5 +104,24 @@
 
 // Helper for abbreviations (glossaries)
 #import "@preview/glossarium:0.5.8": gls, glspl
-#let abbr(key) = gls(key)
-#let abbrpl(key) = glspl(key)
+#import "../template/abbreviations.typ": abbreviations
+
+#let abbr(key) = {
+  let entries = abbreviations()
+  let entry = entries.find(e => e.key == key)
+  let short = if entry != none { entry.short } else { key }
+  gls(key, display: short)
+}
+
+#let abbrpl(key) = {
+  let entries = abbreviations()
+  let entry = entries.find(e => e.key == key)
+  let pl = if entry != none and entry.at("plural", default: "") != "" {
+    entry.plural
+  } else if entry != none {
+    entry.short + "s"
+  } else {
+    key + "s"
+  }
+  glspl(key, display: pl)
+}

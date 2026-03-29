@@ -10,7 +10,7 @@
   === Phase 1: Telemetry Data Generation (Reporter)
   The Translator component relies on Data-Plane Telemetry Architecture (#abbr("dta")) packets to perform inference. Because these packets do not exist in the raw public datasets, they had to be synthetically generated using the actual P4 hardware.
 
-  To achieve this, the TRex server was configured to replay raw tcpdump logs from scenario 6 of the Würzburg #abbr("qoe") dataset into the Tofino switch. The switch, loaded with the "Reporter" P4 program, processed this traffic, forwarded it back to the server, and generated a dedicated #abbr("dta") telemetry packet every 100ms containing the aggregated network features. These #abbr("dta") packets were captured into a #abbr("pcap") file (#code("trex_tofino_reply.pcap")) to serve as the ground-truth input for the subsequent Translator evaluation.
+  To achieve this, the TRex server was configured to replay raw tcpdump logs from scenario 6 of the Würzburg #abbr("qoe") dataset into the Tofino switch. The switch, loaded with the "Reporter" P4 program, processed this traffic, forwarded it back to the server, and generated a dedicated #abbr("dta") telemetry packet every 100ms containing the aggregated network features. These #abbr("dta") packets were captured into a #abbr("pcap") file (`trex_tofino_reply.pcap`) to serve as the ground-truth input for the subsequent Translator evaluation.
 
   #figure(
     image("../assets/pcap.png", width: 80%),
@@ -21,9 +21,9 @@
 
 
   === Phase 2: Translator Inference Testing
-  In the second phase, the Tofino switch was reprogrammed with the "Translator" P4 program, which includes the embedded Random Forest #abbr("ml") tables. The objective was to replay the previously captured #abbr("dta") packets through the Translator to determine whether the switch could correctly classify the #abbr("qoe") state in real-time, append the classification result to the packet header, and execute state-dependent routing decisions.
+  In the second phase, the Tofino switch was reprogrammed with the "Translator" P4 program, which includes the embedded #abbr("rf") #abbr("ml") tables. The objective was to replay the previously captured #abbr("dta") packets through the Translator to determine whether the switch could correctly classify the #abbr("qoe") state in real-time, append the classification result to the packet header, and execute state-dependent routing decisions.
 
-  To automate this, a custom Python testing framework (#link("https://github.com/elmerdema/thesis/blob/main/code/traffic_gen_translator.py")[#code("traffic_gen_translator.py")]) was developed utilizing the TRex Stateless (STL) API and the Scapy packet manipulation library.
+  To automate this, a custom Python testing framework (#link("https://github.com/elmerdema/thesis/blob/main/code/traffic_gen_translator.py")[traffic_gen_translator.py]) was developed utilizing the TRex Stateless (STL) API and the Scapy packet manipulation library.
 
   === Packet Manipulation and Topology Adaptation
   When replaying #abbr("pcap") files in a live network testbed, the original Layer 2 addresses are no longer valid for the current topology. The script utilizes Scapy to load the #abbr("dta") packets (filtered by #abbr("udp") port 40040) and rewrites the Source and Destination #abbr("mac") addresses. The Source #abbr("mac") is updated to the TRex TX interface, and the Destination #abbr("mac") is set to the Tofino switch.
@@ -32,9 +32,9 @@
 
 
   === Timing Preservation
-  Machine learning models analyzing network traffic, especially those utilizing features like jitter, Inter-Arrival Time (#abbr("iat")), and Exponential Moving Averages (#abbr("ema")), are highly sensitive to temporal dynamics. Replaying the #abbr("pcap") file as a single high-speed burst would compress the time windows and invalidate the #abbr("ml") classification.
+  Machine learning models analyzing network traffic, especially those utilizing features like jitter, (#abbr("iat")), and Exponential Moving Averages (#abbr("ema")), are highly sensitive to temporal dynamics. Replaying the #abbr("pcap") file as a single high-speed burst would compress the time windows and invalidate the #abbr("ml") classification.
 
-  To prevent this, the script computes the exact microsecond gap between consecutive packets from the original #abbr("pcap") timestamps. It then utilizes TRex's #code("STLStream") objects, specifically utilizing the Inter-Stream Gap (#code("isg")) parameter and the #code("next") attribute. This creates a chained loop of packets that perfectly mimics the original 100ms emission rate of the Reporter program.
+  To prevent this, the script computes the exact microsecond gap between consecutive packets from the original #abbr("pcap") timestamps. It then utilizes TRex's `STLStream` objects, specifically utilizing the Inter-Stream Gap (`isg`) parameter and the `next` attribute. This creates a chained loop of packets that perfectly mimics the original 100ms emission rate of the Reporter program.
 
   === Overcoming Testbed Artifacts: #abbr("mac") Learning
   A significant challenge encountered during testing involved intermediate network equipment (e.g., Arista switches) located between the TRex server and the Tofino switch. Because the TRex RX port only receives traffic and does not natively transmit, the intermediate switch fails to learn the RX port's #abbr("mac") address, resulting in dropped or flooded return traffic.
@@ -63,9 +63,9 @@
   )
 
   === Execution and Capture
-  With the topology established and timing configured, the TRex server transitions the RX port into a service mode and begins capturing traffic. The #abbr("dta") streams are transmitted from the TX port for a defined duration (10 seconds). As the packets pass through the Tofino switch, the P4 Translator program applies the Random Forest classification, appends the resulting #abbr("qoe") state to the packet, and routes it back.
+  With the topology established and timing configured, the TRex server transitions the RX port into a service mode and begins capturing traffic. The #abbr("dta") streams are transmitted from the TX port for a defined duration (10 seconds). As the packets pass through the Tofino switch, the P4 Translator program applies the #abbr("rf") classification, appends the resulting #abbr("qoe") state to the packet, and routes it back.
 
-  The script continually polls and displays the real-time TX/RX statistics to verify that no packets are dropped during inference. Finally, the test concludes by halting transmission, stopping the capture buffer, and saving the evaluated packets into a new output file (#code("trex_tofino_translator_reply.pcap")) for offline validation of the model's accuracy.
+  The script continually polls and displays the real-time TX/RX statistics to verify that no packets are dropped during inference. Finally, the test concludes by halting transmission, stopping the capture buffer, and saving the evaluated packets into a new output file (`trex_tofino_translator_reply.pcap`) for offline validation of the model's accuracy.
 
   #telemetry_parsing_results()
 ]

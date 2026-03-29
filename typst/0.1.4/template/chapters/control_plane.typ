@@ -5,13 +5,13 @@
   === Control Plane Configuration:  Forwarding
   In a Software-Defined Networking (#abbr("sdn")) architecture using P4, compiling and loading the program onto the Tofino #abbr("asic") only defines the pipeline's structure. Upon initialization, the match-action tables within the data plane are entirely empty, meaning the switch will default to dropping all incoming packets. To establish connectivity within the hardware-in-the-loop testbed, a control plane application is required to populate the forwarding tables.
 
-  For this evaluation, a Python script was developed utilizing the Barefoot Runtime (#abbr("bfrt")) gRPC interface. Unlike full deployment scripts that initialize the entire #abbr("ml") pipeline, telemetry thresholds, and routing logic simultaneously, this script was intentionally decoupled to focus exclusively on the #code("tbl_forward") table.
+  For this evaluation, a Python script was developed utilizing the Barefoot Runtime (#abbr("bfrt")) gRPC interface. Unlike full deployment scripts that initialize the entire #abbr("ml") pipeline, telemetry thresholds, and routing logic simultaneously, this script was intentionally decoupled to focus exclusively on the tbl_forward table.
 
   === Isolated Forwarding Table Configuration
   The decision to isolate the forwarding logic was driven by the need for modularity during testing. By removing the overhead of configuring the entire P4 pipeline, this script allows for rapid, incremental updates to the routing topology without resetting the switch's telemetry or machine learning states. This is particularly advantageous during debugging or when switching between the "Reporter" and "Translator" testing phases, as it guarantees that basic Layer 3 forwarding remains intact regardless of the data plane's experimental features.
 
   === #abbr("bfrt") gRPC Implementation
-  The script connects to the Tofino's #abbr("bfrt") server on #code("localhost:50052") and binds to the deployed pipeline profile (#code("p4_marina_reporter")). It then targets the #code("SwitchIngress.tbl_forward") table, retrieving the dynamically assigned action IDs directly from the compiler's output, which ensures robustness against P4 code modifications.
+  The script connects to the Tofino's #abbr("bfrt") server on localhost:50052 and binds to the deployed pipeline profile (p4_marina_reporter). It then targets the SwitchIngress.tbl_forward table, retrieving the dynamically assigned action IDs directly from the compiler's output, which ensures robustness against P4 code modifications.
 
   #figure(
     image("../assets/bfrt_flow.svg", width: 85%),
@@ -19,9 +19,9 @@
   )
 
   === Table Logic and Topology Integration
-  The hardware testbed consists of the TRex traffic generator communicating with the Tofino switch via an intermediate Arista switch. Because the TRex server generates traffic destined for #code("192.168.100.1"), the Tofino switch must correctly identify these packets, assign them to the correct egress port, and rewrite the Ethernet headers to ensure the Arista switch forwards them back to the TRex RX interface.
+  The hardware testbed consists of the TRex traffic generator communicating with the Tofino switch via an intermediate Arista switch. Because the TRex server generates traffic destined for 192.168.100.1, the Tofino switch must correctly identify these packets, assign them to the correct egress port, and rewrite the Ethernet headers to ensure the Arista switch forwards them back to the TRex RX interface.
 
-  The inserted entry implements Exact Match logic on the IPv4 destination address. When a packet matches, the action parameters (#code("port"), #code("dst_mac"), and #code("src_mac")) are applied natively at line rate by the switch's ALUs. Table 3 outlines the exact mapping programmed by the control plane script.
+  The inserted entry implements Exact Match logic on the IPv4 destination address. When a packet matches, the action parameters (port, dst_mac, and src_mac) are applied natively at line rate by the switch's ALUs. Table 3 outlines the exact mapping programmed by the control plane script.
 
   #figure(
     table(
@@ -32,10 +32,10 @@
 
       [*Component*], [*Parameter*], [*Configured Value*],
 
-      [Match Key], [#code("hdr.ipv4.dstAddr")], [#code("192.168.100.1/32") (Exact Match)],
-      [Action Data], [#code("port")], [#code("16") (Logical Egress Port to TRex)],
-      [Action Data], [#code("src_mac")], [#code("D0:77:CE:2B:20:54") (Tofino Egress #abbr("mac"))],
-      [Action Data], [#code("dst_mac")], [#code("10:70:fd:30:80:d1") (TRex RX Interface #abbr("mac"))],
+      [Match Key], [hdr.ipv4.dstAddr], [192.168.100.1/32 (Exact Match)],
+      [Action Data], [port], [16 (Logical Egress Port to TRex)],
+      [Action Data], [src_mac], [D0:77:CE:2B:20:54 (Tofino Egress #abbr("mac"))],
+      [Action Data], [dst_mac], [10:70:fd:30:80:d1 (TRex RX Interface #abbr("mac"))],
     ),
     caption: [Forwarding rules populated in the data plane by the control plane script.],
   ) <tab:forwarding_rules>
@@ -67,12 +67,12 @@
       fill: (_, row) => if calc.odd(row) { luma(228) } else { white },
       inset: (x: 8pt, y: 5pt),
       table.header(strong[Parameter], strong[Value], strong[Description]),
-      [Destination #abbr("ip")], [#code("192.168.100.1/32")], [Match key in the forward table],
-      [Egress port], [#code("16") (physical 24)], [Tofino port toward TRex Rx],
-      [Source #abbr("mac")], [#code("D0:77:CE:2B:20:54")], [Tofino port 24 #abbr("mac") (rewritten)],
-      [Destination #abbr("mac")], [#code("10:70:fd:30:80:d1")], [TRex port 1 #abbr("mac") (rewritten)],
-      [gRPC endpoint], [#code("localhost:50052")], [BF Runtime control-plane server],
-      [Pipeline], [#code("p4_marina_reporter")], [P4 program bound at runtime],
+      [Destination #abbr("ip")], ["192.168.100.1/32" (Exact Match)], [Match key in the forward table],
+      [Egress port], [16 (physical 24)], [Tofino port toward TRex Rx],
+      [Source #abbr("mac")], [D0:77:CE:2B:20:54], [Tofino port 24 #abbr("mac") (rewritten)],
+      [Destination #abbr("mac")], [10:70:fd:30:80:d1], [TRex port 1 #abbr("mac") (rewritten)],
+      [gRPC endpoint], [localhost:50052], [BF Runtime control-plane server],
+      [Pipeline], [p4_marina_reporter], [P4 program bound at runtime],
     )
   ]
   #figure(

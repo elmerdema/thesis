@@ -3,7 +3,7 @@
   #set par(first-line-indent: 1em, spacing: 1.2em, justify: true)
 
   === Telemetry Generation Results
-  Following the execution of the hardware-in-the-loop tests, the captured traffic (#code("trex_tofino_reply.pcap")) was parsed offline to verify the proper generation of Data-Plane Telemetry Architecture (#abbr("dta")) packets by the Tofino switch. The parser processed approximately 285 MB of traffic, successfully filtering and isolating the telemetry reports from the background traffic.
+  Following the execution of the hardware-in-the-loop tests, the captured traffic (`trex_tofino_reply.pcap`) was parsed offline to verify the proper generation of Data-Plane Telemetry Architecture (#abbr("dta")) packets by the Tofino switch. The parser processed approximately 285 MB of traffic, successfully filtering and isolating the telemetry reports from the background traffic.
 
   #figure(
     table(
@@ -22,7 +22,7 @@
 
   Of the 20,2630 packets captured, the switch successfully emitted 350 dedicated #abbr("dta") telemetry reports (one every 100ms as configured). To validate the hardware logic, the payload of the telemetry reports was fully decoded. Table 2 details the specific fields extracted from Report \#1.
 
-  The values confirm that the Tofino switch correctly tracked the stateful flow metrics, such as accumulated packet counts, Inter-Arrival Time (#abbr("iat")) sums, and jitter directly within the data plane. Additionally, the report appends the machine learning classification outcome and a bitmap indicating which specific features were utilized during the Random Forest inference step.
+  The values confirm that the Tofino switch correctly tracked the stateful flow metrics, such as accumulated packet counts, Inter-Arrival Time (#abbr("iat")) sums, and jitter directly within the data plane. Additionally, the report appends the machine learning classification outcome and a bitmap indicating which specific features were utilized during the #abbr("rf") inference step.
 
   #figure(
     table(
@@ -34,18 +34,18 @@
       [*Telemetry Field*], [*Decoded Hardware Value*],
 
       // --- Encapsulation ---[*--- Network Encapsulation ---*], [],
-      [L2 #abbr("mac") Address], [#code("d0:77:ce:2b:20:54 -> 10:70:fd:30:80:d1")],
-      [L3 #abbr("ip") Address], [#code("192.168.123.1 -> 192.168.100.2")],
-      [L4 Protocol], [#code("UDP 49374 -> 40040 (DTA)")],
+      [L2 #abbr("mac") Address], [d0:77:ce:2b:20:54 -> 10:70:fd:30:80:d1],
+      [L3 #abbr("ip") Address], [192.168.123.1 -> 192.168.100.2],
+      [L4 Protocol], [UDP 49374 -> 40040 (DTA)],
 
       // --- #abbr("dta") Header ---
       [*--- #abbr("dta") Header Metadata ---*], [],
-      [Opcode], [#code("0x05")],
-      [Redundancy Level], [#code("1")],
-      [Telemetry Key (Flow ID)], [#code("2980564395")],
+      [Opcode], [0x05],
+      [Redundancy Level], [1],
+      [Telemetry Key (Flow ID)], [2980564395],
 
       // --- Hardware Features ---[*--- Computed Features (Marina) ---*], [],
-      [Monitored Flow], [#code("192.168.123.1:1025 -> 192.168.100.1:4500 (UDP)")],
+      [Monitored Flow], [192.168.123.1:1025 -> 192.168.100.1:4500 (UDP)],
       [Packet Count], [198],
       [Last Packet Timestamp], [850,630,301],
       [Sum of #abbr("iat")], [99,952,039],
@@ -55,8 +55,8 @@
       [Jitter], [2,001,694],
 
       // --- Inference ---[*--- Inference Output ---*], [],
-      [Classification Result], [*#code("0")* (NON-VIDEO)],
-      [Used Features Bitmap], [#code("0x0000000d")],
+      [Classification Result], [*0* (NON-VIDEO)],
+      [Used Features Bitmap], [0x0000000d],
     ),
     caption: [Detailed breakdown of #abbr("dta") Telemetry Report \#1, showcasing the stateful metrics computed by the Tofino hardware and the resulting #abbr("qoe") classification.],
   ) <tab:dta_report>
