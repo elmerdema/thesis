@@ -42,7 +42,7 @@
 
 // Roman numbered page
 #let roman-page(body) = {
-  page(numbering: "I")[ #body ]
+  page(numbering: "1")[ #body ]
 }
 
 // Outline, which has a title listed in toc and no special formatting
@@ -98,3 +98,11 @@
     text([#txt-todo: #[#it <todo>]], red)
   }
 ]
+
+// Highlight function/variable names
+#let code(it) = text(font: "Courier New", it)
+
+// Helper for abbreviations (glossaries)
+#import "@preview/glossarium:0.5.8": gls, glspl
+#let abbr(key) = gls(key)
+#let abbrpl(key) = glspl(key)

@@ -213,7 +213,7 @@
             }
           ],
         )
-        v(-1em)
+        v(-0.5em)
         line(length: 100%, stroke: 1.2pt + text-color)
       }
     },
@@ -278,6 +278,13 @@
     ]
   }
 
+  // --- INITIALIZERS (must come before abstract and body) ---
+
+  if show-list-of-abbreviations and is-not-none-or-empty(list-of-abbreviations) {
+    show: make-glossary
+    register-glossary(list-of-abbreviations)
+  }
+
   // Abstract
   if is-not-none-or-empty(abstract) {
     roman-page[
@@ -318,11 +325,7 @@
     }
   }
 
-  // --- INITIALIZERS ---
 
-  if show-list-of-abbreviations and is-not-none-or-empty(list-of-abbreviations) {
-    show: make-glossary
-  }
 
   show math.equation.where(block: true): it => rect(width: 100%, fill: background-color)[
     #v(0.5em)
@@ -435,7 +438,6 @@
       pagebreak()
       roman-page[
         #heading(depth: 1, bookmarked: true)[ #get-heading-str("list-of-abbreviations") ]
-        #register-glossary(list-of-abbreviations)
         #set align(left)
         #print-glossary(list-of-abbreviations, show-all: true)
       ]

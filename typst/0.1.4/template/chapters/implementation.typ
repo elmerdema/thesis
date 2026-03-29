@@ -1,3 +1,4 @@
+#import "../lib.typ": *
 #import "pforest_implementation.typ": pforest_implementation
 #import "control_plane.typ": control_plane_configuration
 
@@ -45,7 +46,7 @@
     caption: [Regular expression pattern used to extract packet arrival times and payload lengths.],
   )
 
-  In contrast, the application logs required a two-step parsing process. The parser first identified lines containing JSON objects embedded within the log text. It then extracted the JSON string, corrected formatting inconsistencies (such as trailing braces), and parsed the object to retrieve the ground-truth labels: Bandwidth Estimate (`bwe`) and Buffer Level (`buffer_level_ms`).
+  In contrast, the application logs required a two-step parsing process. The parser first identified lines containing JSON objects embedded within the log text. It then extracted the JSON string, corrected formatting inconsistencies (such as trailing braces), and parsed the object to retrieve the ground-truth labels: Bandwidth Estimate (#code("bwe")) and Buffer Level (#code("buffer_level_ms")).
 
   === Synchronization and Preprocessing
   A critical challenge in this pipeline was aligning the timelines of the two data sources. The application logs recorded timestamps in a timezone differing from the network traces. To rectify this, a one-hour offset was added to the application statistics indices ($bold(t_"stats" + 1"h")$).
@@ -57,7 +58,7 @@
 
 
 
-  First, specific metrics were calculated for every packet $i$ in the stream. The Inter-Arrival Time ($"IAT"$) was derived as the difference in timestamps between consecutive packets. Jitter was calculated as the absolute difference between consecutive IAT values. To capture the higher-order statistical properties of the traffic flow, the second and third moments (squares and cubes) were computed for both packet size ($"PS"$) and $"IAT"$.
+  First, specific metrics were calculated for every packet $i$ in the stream. The Inter-Arrival Time ($"IAT"$) was derived as the difference in timestamps between consecutive packets. Jitter was calculated as the absolute difference between consecutive #abbr("iat") values. To capture the higher-order statistical properties of the traffic flow, the second and third moments (squares and cubes) were computed for both packet size ($"PS"$) and $"IAT"$.
 
   #figure(
     $ "IAT"_i = t_i - t_(i-1) $,
@@ -115,11 +116,11 @@
 
       [Traffic Volume ($"PS"$)], [$sum "PS"_i$], [Sum],
 
-      [Traffic Moments], [$"PS"^2, "PS"^3$], [Sum (of squares/cubes)],
+      [Traffic Moments], [$sum "PS"^2, sum "PS"^3$], [Sum (of squares/cubes)],
 
-      [IAT Total], [$Delta t = t_i - t_(i-1)$], [Sum],
+      [#abbr("iat") Total], [$Delta t = t_i - t_(i-1)$], [Sum],
 
-      [IAT Moments], [$"IAT"^2, "IAT"^3$], [Sum (of squares/cubes)],
+      [#abbr("iat") Moments], [$sum "IAT"^2, sum "IAT"^3$], [Sum (of squares/cubes)],
 
       [Jitter], [$|"IAT"_i - "IAT"_(i-1)|$], [Mean (Sum / Count)],
     ),
@@ -148,11 +149,11 @@
   ) <tab:dataset_summary>
 
   === Target Alignment and Dataset Construction
-  The final stage of the pipeline merged the high-frequency network features with the lower-frequency application labels. Since the application statistics (Buffer Level and BWE) were logged at irregular intervals, a standard join was insufficient. Instead, a `merge_asof` (nearest key) strategy was implemented.
+  The final stage of the pipeline merged the high-frequency network features with the lower-frequency application labels. Since the application statistics (Buffer Level and #abbr("bwe")) were logged at irregular intervals, a standard join was insufficient. Instead, a #code("merge_asof") strategy was implemented.
 
   For each 50ms feature window, the system located the nearest application log entry. A strict tolerance limit of *100ms* was enforced; if no application label existed within 100ms of the window's timestamp, the sample was discarded. This ensured that the model would not learn from stale state information.
 
-  Post-merge, the dataset underwent a cleaning phase where any rows containing `NaN` values for the target variables were dropped. The final output consisted of a CSV file containing approximately 163,000 samples, encompassing the feature vector, the target labels, and identifiers for the video and iteration.
+  Post-merge, the dataset underwent a cleaning phase where any rows containing #code("NaN") values for the target variables were dropped. The final output consisted of a CSV file containing approximately 163,000 samples, encompassing the feature vector, the target labels, and identifiers for the video and iteration.
 
   #figure(
     grid(

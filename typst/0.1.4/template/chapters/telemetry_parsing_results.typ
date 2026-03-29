@@ -1,8 +1,9 @@
+#import "../lib.typ": *
 #let telemetry_parsing_results() = [
   #set par(first-line-indent: 1em, spacing: 1.2em, justify: true)
 
   === Telemetry Generation Results
-  Following the execution of the hardware-in-the-loop tests, the captured traffic (`trex_tofino_reply.pcap`) was parsed offline to verify the proper generation of Data-Plane Telemetry Architecture (DTA) packets by the Tofino switch. The parser processed approximately 285 MB of traffic, successfully filtering and isolating the telemetry reports from the background traffic.
+  Following the execution of the hardware-in-the-loop tests, the captured traffic (#code("trex_tofino_reply.pcap")) was parsed offline to verify the proper generation of Data-Plane Telemetry Architecture (#abbr("dta")) packets by the Tofino switch. The parser processed approximately 285 MB of traffic, successfully filtering and isolating the telemetry reports from the background traffic.
 
   #figure(
     table(
@@ -14,14 +15,14 @@
 
       [Total Captured Packets], [20,263],
       [Background / Other Packets], [20,228],
-      [DTA Telemetry Reports generated], [*350*],
+      [#abbr("dta") Telemetry Reports generated], [*350*],
     ),
-    caption: [Summary of the captured PCAP file during the Reporter testing phase.],
+    caption: [Summary of the captured #abbr("pcap") file during the Reporter testing phase.],
   ) <tab:pcap_summary>
 
-  Of the 20,2630 packets captured, the switch successfully emitted 350 dedicated DTA telemetry reports (one every 100ms as configured). To validate the hardware logic, the payload of the telemetry reports was fully decoded. Table 2 details the specific fields extracted from Report \#1.
+  Of the 20,2630 packets captured, the switch successfully emitted 350 dedicated #abbr("dta") telemetry reports (one every 100ms as configured). To validate the hardware logic, the payload of the telemetry reports was fully decoded. Table 2 details the specific fields extracted from Report \#1.
 
-  The values confirm that the Tofino switch correctly tracked the stateful flow metrics, such as accumulated packet counts, Inter-Arrival Time (IAT) sums, and jitter directly within the data plane. Additionally, the report appends the machine learning classification outcome and a bitmap indicating which specific features were utilized during the Random Forest inference step.
+  The values confirm that the Tofino switch correctly tracked the stateful flow metrics, such as accumulated packet counts, Inter-Arrival Time (#abbr("iat")) sums, and jitter directly within the data plane. Additionally, the report appends the machine learning classification outcome and a bitmap indicating which specific features were utilized during the Random Forest inference step.
 
   #figure(
     table(
@@ -33,30 +34,30 @@
       [*Telemetry Field*], [*Decoded Hardware Value*],
 
       // --- Encapsulation ---[*--- Network Encapsulation ---*], [],
-      [L2 MAC Address], [`d0:77:ce:2b:20:54 -> 10:70:fd:30:80:d1`],
-      [L3 IP Address], [`192.168.123.1 -> 192.168.100.2`],
-      [L4 Protocol], [`UDP 49374 -> 40040 (DTA)`],
+      [L2 #abbr("mac") Address], [#code("d0:77:ce:2b:20:54 -> 10:70:fd:30:80:d1")],
+      [L3 #abbr("ip") Address], [#code("192.168.123.1 -> 192.168.100.2")],
+      [L4 Protocol], [#code("UDP 49374 -> 40040 (DTA)")],
 
-      // --- DTA Header ---
-      [*--- DTA Header Metadata ---*], [],
-      [Opcode], [`0x05`],
-      [Redundancy Level], [`1`],
-      [Telemetry Key (Flow ID)], [`2980564395`],
+      // --- #abbr("dta") Header ---
+      [*--- #abbr("dta") Header Metadata ---*], [],
+      [Opcode], [#code("0x05")],
+      [Redundancy Level], [#code("1")],
+      [Telemetry Key (Flow ID)], [#code("2980564395")],
 
       // --- Hardware Features ---[*--- Computed Features (Marina) ---*], [],
-      [Monitored Flow], [`192.168.123.1:1025 -> 192.168.100.1:4500 (UDP)`],
+      [Monitored Flow], [#code("192.168.123.1:1025 -> 192.168.100.1:4500 (UDP)")],
       [Packet Count], [198],
       [Last Packet Timestamp], [850,630,301],
-      [Sum of IAT], [99,952,039],
+      [Sum of #abbr("iat")], [99,952,039],
       [Sum of IAT² / IAT³], [0 / 0],
       [Sum of Packet Size], [272,844],
       [Sum of Packet Size² / Size³], [0 / 0],
       [Jitter], [2,001,694],
 
       // --- Inference ---[*--- Inference Output ---*], [],
-      [Classification Result], [*`0`* (NON-VIDEO)],
-      [Used Features Bitmap], [`0x0000000d`],
+      [Classification Result], [*#code("0")* (NON-VIDEO)],
+      [Used Features Bitmap], [#code("0x0000000d")],
     ),
-    caption: [Detailed breakdown of DTA Telemetry Report \#1, showcasing the stateful metrics computed by the Tofino hardware and the resulting QoE classification.],
+    caption: [Detailed breakdown of #abbr("dta") Telemetry Report \#1, showcasing the stateful metrics computed by the Tofino hardware and the resulting #abbr("qoe") classification.],
   ) <tab:dta_report>
 ]
