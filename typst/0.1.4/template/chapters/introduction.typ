@@ -8,11 +8,11 @@
 
   #abbr("ml") is a subgroup of Artificial Intelligence (#abbr("ai")), a field where computers autonomously learn from past data to generate
   predictions or solutions. Recently, there has been a surge in applying #abbr("ml") methods to address practical challenges within
-  computer networks @izima_video_quality_prediction. This thesis implements and extends recent applications of #abbr("ml") techniques that use Quality of Experience (#abbr("qoe")) metrics to predict video quality.
+  computer networks @izima_video_quality_prediction. This thesis implements and extends recent applications of #abbr("ml") techniques that use #abbr("qoe") metrics to predict video quality.
   These #abbr("qoe") measurements are essential for capturing the end-to-end performance of network services @vega_resilience_video_streaming.
   As video data makes up the majority of global #abbr("ip") traffic @cisco_vni_2017_2022, network operators are under pressure to optimize resource management while satisfying
   user demands. In general, Video Quality Assessment (#abbr("vqa")) has relied on both subjective @itu_p910_video_quality and objective @chikkerur_objective_video_quality_assessment methodologies. Subjective methods focus
-  on quantifying the end-user's satisfaction. Consequently, network traffic management driven by Quality of Experience (#abbr("qoe")) depends on monitoring and forecasting
+  on quantifying the end-user's satisfaction. Consequently, network traffic management driven by #abbr("qoe") depends on monitoring and forecasting
   application-level performance or #abbr("qoe") via video Key Performance Indicators (#abbrpl("kpi")) that impact the user. The International Telecommunication Union (#abbr("itu")) characterizes
   #abbr("qoe") as the overall experience of a service from the subjective viewpoint of the end user @itu_g1011_qoe_assessment.
 

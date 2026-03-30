@@ -3,7 +3,7 @@
   #set par(first-line-indent: 1em, spacing: 1.2em, justify: true)
 
   == Data Plane Translator Architecture
-  The "Translator" is the intelligent core of the proposed in-network telemetry system. While the Reporter component is responsible for aggregating flow statistics, the Translator consumes these statistics, executes a machine learning inference directly within the data plane, and enforces state-dependent routing policies.
+  The Translator is the intelligent core of the proposed in-network telemetry system. While the Reporter component is responsible for aggregating flow statistics, the Translator consumes these statistics, executes a #abbr("ml") inference directly within the data plane, and enforces state-dependent routing policies.
 
   Because standard decision trees rely on recursive branching (`if-else` structures) which are incompatible with the strict pipeline constraints of the Intel Tofino #abbr("asic"), the P4 program was automatically generated using a custom script (#link("https://github.com/elmerdema/thesis/blob/main/code/p4_generator_tna.py")[p4_generator_tna.py]). This generator translates a trained #abbr("rf") model into hardware-compatible Match-Action Tables (#abbrpl("mat")).
 
@@ -26,10 +26,10 @@
   === #abbr("rf") Hardware Mapping
   To execute a #abbr("rf") within the Tofino data plane, the #link("https://github.com/elmerdema/thesis/blob/main/code/src/p4_generator_tna.py")[p4_generator_tna.py] script employs two critical design patterns: Ternary Match-Action mapping and Physical Stage Unrolling.
 
-  ==== Ternary Range Matching (#abbr("tcam"))
+  ==== Decision Tree Encoding
   Decision tree nodes evaluate features using inequalities (e.g., $X_"jitter" < 500$). The Tofino #abbr("asic") evaluates inequalities using Ternary Content-Addressable Memory (#abbr("tcam")). The generator maps the decision thresholds into ternary bitmasks.
 
-  Each tree is represented by a set of tables where the match keys include the `current_node` (Exact match) and the four network features (`packet_count`, `ps_sum`, `iat_sum`, `jitter`) as Ternary matches. Depending on the matched rule, the ALU executes either `action_goto_node` to traverse deeper into the tree, or `action_set_leaf` to output a class prediction.
+  Each tree is represented by a set of tables where the match keys include the #code(`current_node`) (Exact match) and the four network features (#code(`packet_count`), #code(`ps_sum`), #code(`iat_sum`), #code(`jitter`)) as Ternary matches. Depending on the matched rule, the Arithmetic Logic Unit (#abbr("alu")) executes either #code(`action_goto_node`) to traverse deeper into the tree, or #code(`action_set_leaf`) to output a class prediction.
 
   #figure(
     box(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
@@ -57,17 +57,17 @@
   ==== Physical Stage Unrolling
   The Tofino architecture enforces a strict Directed Acyclic Graph (#abbr("dag")) for table execution; a table cannot recursively call itself, nor can multiple tables modifying the same metadata execute in the same physical pipeline stage.
 
-  To bypass this, the generator "unrolls" the trees. If the #abbr("rf") relies on trees with a maximum depth of 3, the generator creates three distinct tables per tree (e.g., `tbl_tree_0_stage_0`, `tbl_tree_0_stage_1`, `tbl_tree_0_stage_2`). In the `apply` block, these tables are executed sequentially, allowing the packet to traverse from the root to the leaf node across consecutive physical ALU stages.
+  To bypass this, the generator "unrolls" the trees. If the #abbr("rf") relies on trees with a maximum depth of 3, the generator creates three distinct tables per tree (e.g., #code(`tbl_tree_0_stage_0`), #code(`tbl_tree_0_stage_1`), #code(`tbl_tree_0_stage_2`)). In the #code(`apply`) block, these tables are executed sequentially, allowing the packet to traverse from the root to the leaf node across consecutive physical #abbr("alu") stages.
 
   === Voting Mechanism
-  Because a #abbr("rf") consists of multiple independent decision trees (in this implementation, four trees), their individual predictions must be aggregated to form a final classification. This is handled by a dedicated `tbl_voting` match-action table.
+  Because a #abbr("rf") consists of multiple independent decision trees (in this implementation, four trees), their individual predictions must be aggregated to form a final classification. This is handled by a dedicated #code(`tbl_voting`) match-action table.
 
   To conserve limited Arithmetic Logic Unit (ALU) cycles, the voting logic is pre-computed by the Python generator and hardcoded as exact-match entries. The table takes the four leaf outputs (`tree0_result` through `tree3_result`) as exact match keys and outputs the majority `final_class` alongside a confidence score (the vote tally).
 
 
 
   === State-Dependent Routing and Deparsing
-  Once the `final_class` is resolved, the Translator uses this result to perform Quality of Experience (#abbr("qoe")) or security routing. This is controlled by the `tbl_classification_action` table.
+  Once the `final_class` is resolved, the Translator uses this result to perform #abbr("qoe") or security routing. This is controlled by the `tbl_classification_action` table.
 
   If the traffic is classified as benign (Class 0), the switch executes `forward_benign` and routes the traffic along its normal path (e.g., egress port 36). However, if the traffic is classified as critical or malicious (Class 1), the switch can execute dynamic mitigation strategies, such as `forward_to_ids` (redirecting the packet to port 64 for #abbr("dpi")) or `drop_malicious` to quarantine the flow entirely at line rate.
 

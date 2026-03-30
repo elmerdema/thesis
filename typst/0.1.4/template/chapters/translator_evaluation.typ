@@ -5,12 +5,12 @@
   #set par(first-line-indent: 1em, spacing: 1.2em, justify: true)
 
   == System Evaluation and Translator Testing
-  To evaluate the performance and accuracy of the in-network Quality of Experience (#abbr("qoe")) classification model, a hardware-in-the-loop testbed was utilized. The topology consists of a TRex software traffic generator connected to an Intel Tofino programmable switch. The evaluation was conducted in a two-phase approach: first generating the necessary telemetry data, and second, testing the Translator's inference and routing capabilities.
+  To evaluate the performance and accuracy of the in-network #abbr("qoe") classification model, a hardware-in-the-loop testbed was utilized. The topology consists of a TRex software traffic generator connected to an Intel Tofino programmable switch. The evaluation was conducted in a two-phase approach: first generating the necessary telemetry data, and second, testing the Translator's inference and routing capabilities.
 
   === Phase 1: Telemetry Data Generation (Reporter)
   The Translator component relies on Data-Plane Telemetry Architecture (#abbr("dta")) packets to perform inference. Because these packets do not exist in the raw public datasets, they had to be synthetically generated using the actual P4 hardware.
 
-  To achieve this, the TRex server was configured to replay raw tcpdump logs from scenario 6 of the Würzburg #abbr("qoe") dataset into the Tofino switch. The switch, loaded with the "Reporter" P4 program, processed this traffic, forwarded it back to the server, and generated a dedicated #abbr("dta") telemetry packet every 100ms containing the aggregated network features. These #abbr("dta") packets were captured into a #abbr("pcap") file (`trex_tofino_reply.pcap`) to serve as the ground-truth input for the subsequent Translator evaluation.
+  To achieve this, the TRex server was configured to replay raw tcpdump logs from scenario 6 of the Würzburg #abbr("qoe") dataset into the Tofino switch. The switch, loaded with the Reporter P4 program, processed this traffic, forwarded it back to the server, and generated a dedicated #abbr("dta") telemetry packet every 100ms containing the aggregated network features. These #abbr("dta") packets were captured into a #abbr("pcap") file (`trex_tofino_reply.pcap`) to serve as the ground-truth input for the subsequent Translator evaluation.
 
   #figure(
     image("../assets/pcap.png", width: 80%),
@@ -21,7 +21,7 @@
 
 
   === Phase 2: Translator Inference Testing
-  In the second phase, the Tofino switch was reprogrammed with the "Translator" P4 program, which includes the embedded #abbr("rf") #abbr("ml") tables. The objective was to replay the previously captured #abbr("dta") packets through the Translator to determine whether the switch could correctly classify the #abbr("qoe") state in real-time, append the classification result to the packet header, and execute state-dependent routing decisions.
+  In the second phase, the Tofino switch was reprogrammed with the Translator P4 program, which includes the embedded #abbr("rf") #abbr("ml") tables. The objective was to replay the previously captured #abbr("dta") packets through the Translator to determine whether the switch could correctly classify the #abbr("qoe") state in real-time, append the classification result to the packet header, and execute state-dependent routing decisions.
 
   To automate this, a custom Python testing framework (#link("https://github.com/elmerdema/thesis/blob/main/code/traffic_gen_translator.py")[traffic_gen_translator.py]) was developed utilizing the TRex Stateless (STL) API and the Scapy packet manipulation library.
 
@@ -32,14 +32,14 @@
 
 
   === Timing Preservation
-  Machine learning models analyzing network traffic, especially those utilizing features like jitter, (#abbr("iat")), and Exponential Moving Averages (#abbr("ema")), are highly sensitive to temporal dynamics. Replaying the #abbr("pcap") file as a single high-speed burst would compress the time windows and invalidate the #abbr("ml") classification.
+  #abbr("ml") models analyzing network traffic, especially those utilizing features like jitter, (#abbr("iat")), and #abbr("ema"), are highly sensitive to temporal dynamics. Replaying the #abbr("pcap") file as a single high-speed burst would compress the time windows and invalidate the #abbr("ml") classification.
 
   To prevent this, the script computes the exact microsecond gap between consecutive packets from the original #abbr("pcap") timestamps. It then utilizes TRex's `STLStream` objects, specifically utilizing the Inter-Stream Gap (`isg`) parameter and the `next` attribute. This creates a chained loop of packets that perfectly mimics the original 100ms emission rate of the Reporter program.
 
   === Overcoming Testbed Artifacts: #abbr("mac") Learning
   A significant challenge encountered during testing involved intermediate network equipment (e.g., Arista switches) located between the TRex server and the Tofino switch. Because the TRex RX port only receives traffic and does not natively transmit, the intermediate switch fails to learn the RX port's #abbr("mac") address, resulting in dropped or flooded return traffic.
 
-  To resolve this, a "Keepalive" mechanism was implemented. Before initiating the #abbr("dta") traffic burst, the script instructs TRex to transmit dummy broadcast #abbr("udp") packets from the RX port. This forces the intermediate switch to populate its #abbr("mac") address table (FDB), ensuring a clean and reliable return path for the packets evaluated by the Tofino switch.
+  To resolve this, a "Keepalive" mechanism was implemented. Before initiating the #abbr("dta") traffic burst, the script instructs TRex to transmit dummy broadcast #abbr("udp") packets from the RX port. This forces the intermediate switch to populate its #abbr("mac") address table, ensuring a clean and reliable return path for the packets evaluated by the Tofino switch.
 
   #figure(
     box(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[

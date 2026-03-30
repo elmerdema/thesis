@@ -20,9 +20,9 @@
     caption: [Summary of the captured #abbr("pcap") file during the Reporter testing phase.],
   ) <tab:pcap_summary>
 
-  Of the 20,2630 packets captured, the switch successfully emitted 350 dedicated #abbr("dta") telemetry reports (one every 100ms as configured). To validate the hardware logic, the payload of the telemetry reports was fully decoded. Table 2 details the specific fields extracted from Report \#1.
+  Of the 20,263 packets captured, the switch successfully emitted 350 dedicated #abbr("dta") telemetry reports (one every 100ms as configured). To validate the hardware logic, the payload of the telemetry reports was fully decoded. Table 2 details the specific fields extracted from Report \#1.
 
-  The values confirm that the Tofino switch correctly tracked the stateful flow metrics, such as accumulated packet counts, Inter-Arrival Time (#abbr("iat")) sums, and jitter directly within the data plane. Additionally, the report appends the machine learning classification outcome and a bitmap indicating which specific features were utilized during the #abbr("rf") inference step.
+  The values confirm that the Tofino switch correctly tracked the stateful flow metrics, such as accumulated packet counts, #abbr("iat") sums, and jitter directly within the data plane. Additionally, the report appends the #abbr("ml") classification outcome and a bitmap indicating which specific features were utilized during the #abbr("rf") inference step.
 
   #figure(
     table(
@@ -58,6 +58,6 @@
       [Classification Result], [*0* (NON-VIDEO)],
       [Used Features Bitmap], [0x0000000d],
     ),
-    caption: [Detailed breakdown of #abbr("dta") Telemetry Report \#1, showcasing the stateful metrics computed by the Tofino hardware and the resulting #abbr("qoe") classification.],
+    caption: [Detailed breakdown of #abbr("dta") Telemetry Report \#1, showcasing the stateful metrics computed by the Tofino hardware],
   ) <tab:dta_report>
 ]

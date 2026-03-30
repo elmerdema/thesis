@@ -269,4 +269,13 @@
     description: none,
     group: "",
   ),
+  (
+    key: "alu",
+    short: "ALU",
+    plural: "",
+    long: "Arithmetic Logic Unit",
+    longplural: "",
+    description: none,
+    group: "",
+  ),
 )

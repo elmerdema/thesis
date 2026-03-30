@@ -8,7 +8,7 @@
   For this evaluation, a Python script was developed utilizing the Barefoot Runtime (#abbr("bfrt")) gRPC interface. Unlike full deployment scripts that initialize the entire #abbr("ml") pipeline, telemetry thresholds, and routing logic simultaneously, this script was intentionally decoupled to focus exclusively on the tbl_forward table.
 
   === Isolated Forwarding Table Configuration
-  The decision to isolate the forwarding logic was driven by the need for modularity during testing. By removing the overhead of configuring the entire P4 pipeline, this script allows for rapid, incremental updates to the routing topology without resetting the switch's telemetry or machine learning states. This is particularly advantageous during debugging or when switching between the "Reporter" and "Translator" testing phases, as it guarantees that basic Layer 3 forwarding remains intact regardless of the data plane's experimental features.
+  The decision to isolate the forwarding logic was driven by the need for modularity during testing. By removing the overhead of configuring the entire P4 pipeline, this script allows for rapid, incremental updates to the routing topology without resetting the switch's telemetry or #abbr("ml") states. This is particularly advantageous during debugging or when switching between the Reporter and Translator testing phases, as it guarantees that basic Layer 3 forwarding remains intact regardless of the data plane's experimental features.
 
   === #abbr("bfrt") gRPC Implementation
   The script connects to the Tofino's #abbr("bfrt") server on localhost:50052 and binds to the deployed pipeline profile (p4_marina_reporter). It then targets the SwitchIngress.tbl_forward table, retrieving the dynamically assigned action IDs directly from the compiler's output, which ensures robustness against P4 code modifications.
@@ -21,7 +21,7 @@
   === Table Logic and Topology Integration
   The hardware testbed consists of the TRex traffic generator communicating with the Tofino switch via an intermediate Arista switch. Because the TRex server generates traffic destined for 192.168.100.1, the Tofino switch must correctly identify these packets, assign them to the correct egress port, and rewrite the Ethernet headers to ensure the Arista switch forwards them back to the TRex RX interface.
 
-  The inserted entry implements Exact Match logic on the IPv4 destination address. When a packet matches, the action parameters (port, dst_mac, and src_mac) are applied natively at line rate by the switch's ALUs. Table 3 outlines the exact mapping programmed by the control plane script.
+  The inserted entry implements Exact Match logic on the IPv4 destination address. When a packet matches, the action parameters (port, dst_mac, and src_mac) are applied natively at line rate by the switch's #abbr("alu"). Table 3 outlines the exact mapping programmed by the control plane script.
 
   #figure(
     table(
@@ -45,7 +45,7 @@
   #pagebreak()
 
   === Full Control Plane Script
-  The following code block contains the complete Python script used to interact with the Barefoot Runtime (#abbr("bfrt")) gRPC interface. This script is responsible for pushing the exact match forwarding rules to the Tofino switch's data plane.
+  The following code block contains the complete Python script used to interact with the #abbr("bfrt") gRPC interface. This script is responsible for pushing the exact match forwarding rules to the Tofino switch's data plane.
 
   #block(fill: luma(240), inset: 12pt, radius: 6pt, width: 100%, breakable: true)[
     #set align(left)

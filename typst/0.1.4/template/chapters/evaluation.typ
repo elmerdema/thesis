@@ -11,7 +11,7 @@
   This section presents the results of the benchmarking framework developed to evaluate the practical limits of in-network #abbr("qoe") prediction. The automated pipeline, which is implemented in the #link("https://github.com/elmerdema/thesis/blob/main/code/benchmark.py")[#code("code/benchmark.py")] script, trains #abbr("rf") models with varying hyperparameters, translates them into P4 code, and utilizes the Intel SDE compiler to evaluate architectural resource consumption.
 
   === Feature Scaling and Hardware Constraints
-  The first major experiment evaluates the impact of the number of telemetry features ($k$) on both Machine Learning (#abbr("ml")) performance and hardware resource utilization. The sweep was conducted using a fixed configuration of 2 trees and depth 2, isolating the effect of feature count from other hyperparameters.
+  The first major experiment evaluates the impact of the number of telemetry features ($k$) on both #abbr("ml") performance and hardware resource utilization. The sweep was conducted using a fixed configuration of 2 trees and depth 2, isolating the effect of feature count from other hyperparameters.
 
   #figure(
     image("../assets/benchmarks/01_feature_sweep_ml.png", width: 100%),
@@ -71,8 +71,8 @@
 
   == Conclusion
 
-  This work bridges the gap between high-level machine learning models and low-level
-  data plane programming, demonstrating that Quality of Experience prediction from
+  This work bridges the gap between high-level #abbr("ml") models and low-level
+  data plane programming, demonstrating that #abbr("qoe") prediction from
   encrypted video traffic is not only theoretically possible, but practically achievable within
   the strict physical constraints of modern programmable ASICs.
 
@@ -84,8 +84,8 @@
   concrete contributions support this conclusion:
 
   First, the MARINA feature pipeline was successfully adapted for in-network deployment.
-  By reducing the feature space to four hardware-feasible metrics (#code("ps_sum"), #code("ps2_sum"),
-  #code("ps3_sum"), and #code("jitter")) and aggregating them over non-overlapping 50ms windows,
+  By reducing the feature space to four hardware-feasible metrics (ps_sum, ps2_sum,
+  ps3_sum, and jitter) and aggregating them over non-overlapping 50ms windows,
   the system achieved a classification accuracy of 0.76 (15 percentage points above the majority-class baseline) with an F1-score of 0.80 for the
   critical *At\_Risk* class. This demonstrates that a small, carefully selected feature
   subset can retain the majority of predictive power while remaining deployable on hardware.
@@ -210,7 +210,7 @@
 
   Despite these results, several limitations should be acknowledged. The model was
   trained and evaluated on a single scenario (scenario 6, automatic quality selection) of the Würzburg #abbr("qoe") dataset.
-  The dataset contains 7 other scenarios (Scenarios 1-5, 7, 8) that introduce various network degradations like rate-limiting and delay. Evaluating on these rate-limited scenarios would likely induce distribution shifts; specifically, rate-limited scenarios trigger more extreme buffer drops, meaning more *At\_Risk* events and potentially inflated recall.
+  The dataset contains 7 other scenarios (scenarios 1-5, 7, 8) that introduce various network degradations like rate-limiting and delay. Evaluating on these rate-limited scenarios would likely induce distribution shifts; specifically, rate-limited scenarios trigger more extreme buffer drops, meaning more *At\_Risk* events and potentially inflated recall.
   Generalizability to other platforms (e.g., Netflix, Twitch), transport protocols (e.g.,
   QUIC-based streaming), or network environments (e.g., high-latency satellite links)
   remains to be validated.

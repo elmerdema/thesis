@@ -6,7 +6,7 @@
 
   The processing flow begins in the Data Plane when raw packets enter the ingress pipeline. For every incoming packet, the REPORTER updates Feature Registries with new telemetry data. A subset of these extracted features is then used by a (#abbr("rf")) Classifier, which is encoded directly into the reporter's hardware. This classifier determines if a packet belongs to a video flow.
 
-  If a packet is classified as a video packet, the REPORTER sends a *telemetry packet* to a downstream Translator Switch at a specific time interval. This telemetry packet carries the extracted features and the classification result. The Translator Switch then receives this packet and uses it to perform further *Quality of Experience (#abbr("qoe")) classification* by running a specific, potentially different, model on the incoming classified video packets.
+  If a packet is classified as a video packet, the REPORTER sends a *telemetry packet* to a downstream Translator Switch at a specific time interval. This telemetry packet carries the extracted features and the classification result. The Translator Switch then receives this packet and uses it to perform further *#abbr("qoe") classification* by running a specific, potentially different, model on the incoming classified video packets.
 
   In parallel, the Control Plane oversees model lifecycle management. It handles the offline training of #abbr("rf") models, encodes them into hardware table entries via the `TofinoForestManager`.
 
