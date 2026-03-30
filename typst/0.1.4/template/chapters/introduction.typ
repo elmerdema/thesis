@@ -6,7 +6,7 @@
     justify: true,
   )
 
-  Machine Learning (#abbr("ml")) is a subgroup of Artificial Intelligence (#abbr("ai")), a field where computers autonomously learn from past data to generate
+  #abbr("ml") is a subgroup of Artificial Intelligence (#abbr("ai")), a field where computers autonomously learn from past data to generate
   predictions or solutions. Recently, there has been a surge in applying #abbr("ml") methods to address practical challenges within
   computer networks @izima_video_quality_prediction. This thesis implements and extends recent applications of #abbr("ml") techniques that use Quality of Experience (#abbr("qoe")) metrics to predict video quality.
   These #abbr("qoe") measurements are essential for capturing the end-to-end performance of network services @vega_resilience_video_streaming.

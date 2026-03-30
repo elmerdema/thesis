@@ -69,7 +69,7 @@
   === State-Dependent Routing and Deparsing
   Once the `final_class` is resolved, the Translator uses this result to perform Quality of Experience (#abbr("qoe")) or security routing. This is controlled by the `tbl_classification_action` table.
 
-  If the traffic is classified as benign (Class 0), the switch executes `forward_benign` and routes the traffic along its normal path (e.g., egress port 36). However, if the traffic is classified as critical or malicious (Class 1), the switch can execute dynamic mitigation strategies, such as `forward_to_ids` (redirecting the packet to port 64 for deep packet inspection) or `drop_malicious` to quarantine the flow entirely at line rate.
+  If the traffic is classified as benign (Class 0), the switch executes `forward_benign` and routes the traffic along its normal path (e.g., egress port 36). However, if the traffic is classified as critical or malicious (Class 1), the switch can execute dynamic mitigation strategies, such as `forward_to_ids` (redirecting the packet to port 64 for #abbr("dpi")) or `drop_malicious` to quarantine the flow entirely at line rate.
 
   Finally, during the Deparsing stage, the switch does not strip the telemetry. Instead, it recomputes the IPv4 checksum and emits the packet along with a newly appended `classification_h` header. This custom header encapsulates the final class result, the confidence score, and the exact tree vote distribution, allowing downstream analytics servers to verify the Tofino ASIC's in-network inference accuracy.
 ]
